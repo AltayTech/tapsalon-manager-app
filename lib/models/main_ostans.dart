@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 
-import 'ostan.dart';
+import 'province.dart';
 
 class MainOstans with ChangeNotifier {
   final int current_page;
-  final List<Ostan> data;
+  final List<Province> data;
   final String first_page_url;
   final int from;
   final int last_page;
@@ -32,8 +32,8 @@ class MainOstans with ChangeNotifier {
 
   factory MainOstans.fromJson(Map<String, dynamic> parsedJson) {
     var dataList = parsedJson['data'] as List;
-    List<Ostan> dataRaw = new List<Ostan>();
-    dataRaw = dataList.map((i) => Ostan.fromJson(i)).toList();
+    List<Province> dataRaw = new List<Province>();
+    dataRaw = dataList.map((i) => Province.fromJson(i)).toList();
 
     return MainOstans(
       current_page: parsedJson['current_page'],

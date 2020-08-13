@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-
-import 'facility.dart';
+import '../models/facility.dart';
 
 class MainFacilities with ChangeNotifier {
   final int current_page;

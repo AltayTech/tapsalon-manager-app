@@ -7,16 +7,22 @@ class Field with ChangeNotifier {
   final String excerpt;
   final String icon;
 
-
-  Field({this.id, this.description, this.name, this.excerpt, this.icon});
+  Field({
+    this.id,
+    this.description,
+    this.name,
+    this.excerpt,
+    this.icon,
+  });
 
   factory Field.fromJson(Map<String, dynamic> parsedJson) {
     return Field(
-      id: parsedJson['id'],
-      name: parsedJson['name'],
-      description: parsedJson['description'],
-      excerpt: parsedJson['excerpt'],
-      icon: parsedJson['icon'],
+      id: parsedJson['id'] != null ? parsedJson['id'] : 0,
+      name: parsedJson['name'] != null ? parsedJson['name'] : '',
+      description:
+          parsedJson['description'] != null ? parsedJson['description'] : '',
+      excerpt: parsedJson['excerpt'] != null ? parsedJson['excerpt'] : '',
+      icon: parsedJson['icon'] != null ? parsedJson['icon'] : '',
     );
   }
 }

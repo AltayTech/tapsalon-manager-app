@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:tapsalon_manager/models/region.dart';
 
-import 'region.dart';
 
 class MainRegions with ChangeNotifier {
   final int current_page;

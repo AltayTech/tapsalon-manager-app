@@ -13,9 +13,9 @@ class Role with ChangeNotifier {
 
   factory Role.fromJson(Map<String, dynamic> parsedJson) {
     return Role(
-      id: parsedJson['id'],
-      description: parsedJson['description'],
-      name: parsedJson['name'],
+      id: parsedJson['id']!= null ? parsedJson['id'] : 0,
+      description: parsedJson['description']!= null ? parsedJson['description'] : '',
+      name: parsedJson['name']!= null ? parsedJson['name'] : '',
     );
   }
 }

@@ -5,20 +5,17 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
-import 'package:tapsalon_manager/models/app_theme.dart';
-import 'package:tapsalon_manager/models/complex.dart';
-import 'package:tapsalon_manager/models/place.dart';
-import 'package:tapsalon_manager/provider/complexes.dart';
-import 'package:tapsalon_manager/provider/salons.dart';
-import 'package:tapsalon_manager/widget/custom_dialog_select_image_picker.dart';
+import 'package:tapsalon_manager/models/places_models/place.dart';
+import 'package:tapsalon_manager/provider/app_theme.dart';
+import 'package:tapsalon_manager/provider/places.dart';
+import 'package:tapsalon_manager/widget/dialogs/custom_dialog_select_image_picker.dart';
 import 'package:tapsalon_manager/widget/main_drawer.dart';
 
 class PlaceGalleryEditScreen extends StatefulWidget {
-  static const routeName = '/palce-gallaey-edit';
+  static const routeName = '/PlaceGalleryEditScreen';
 
   @override
-  _PlaceGalleryEditScreenState createState() =>
-      _PlaceGalleryEditScreenState();
+  _PlaceGalleryEditScreenState createState() => _PlaceGalleryEditScreenState();
 }
 
 class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
@@ -27,7 +24,6 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
   var _isLoadingremoveImage = false;
   bool _isInit = true;
   TabController _tabController;
-
 
   var title;
 
@@ -40,6 +36,8 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
   Place place;
 
   File _image;
+
+  int selectedImageId;
 
   @override
   void initState() {
@@ -62,20 +60,26 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
   @override
   void didChangeDependencies() {
     if (_isInit) {
-      place = ModalRoute.of(context).settings.arguments as Place;
+      final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+
+      place = arguments['place'];
     }
     _isInit = false;
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
   }
 
-  Future<void> addPicture(int place_id, String title) async {
+  Future<void> addPicture(String title) async {
     print('addPicture');
+
     ImageSource imageSource =
-        await Provider.of<Complexes>(context, listen: false).imageSource;
+        await Provider.of<Places>(context, listen: false).imageSource;
+
     print('imageSource');
 
-    _image = await ImagePicker.pickImage(source: imageSource);
+    PickedFile pickedFile = await ImagePicker().getImage(source: imageSource);
+
+    _image = File(pickedFile.path);
+
     print('ImagePicker');
   }
 
@@ -85,15 +89,17 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
     });
     await showDialog(
         context: context, builder: (ctx) => CustomDialogSelectImagePicker());
-    await addPicture(place.id, title);
+    await addPicture(title);
     print(_image.path);
 
     if (_image != null) {
-      await Provider.of<Complexes>(context, listen: false)
-          .Upload(_image, place.id,place.complexInPlace.id, title);
+      await Provider.of<Places>(context, listen: false).uploadImage(
+        _image,
+        place.id,
+      );
     }
-    await Provider.of<Salons>(context, listen: false).retrievePlace(place.id);
-    place = Provider.of<Salons>(context, listen: false).itemPlace;
+    await Provider.of<Places>(context, listen: false).retrievePlace(place.id);
+    place = Provider.of<Places>(context, listen: false).itemPlace;
     setState(() {
       _isLoading = false;
       print(_isLoading.toString());
@@ -106,16 +112,18 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
       _isLoadingremoveImage = true;
     });
 
-    await Provider.of<Complexes>(context, listen: false).deleteImage(imageId);
+    await Provider.of<Places>(context, listen: false).deleteImage(imageId);
 
-    await Provider.of<Salons>(context, listen: false).retrievePlace(place.id);
-    place = Provider.of<Salons>(context, listen: false).itemPlace;
+    await Provider.of<Places>(context, listen: false).retrievePlace(place.id);
+    place = Provider.of<Places>(context, listen: false).itemPlace;
     setState(() {
       _isLoadingremoveImage = false;
       print(_isLoadingremoveImage.toString());
     });
     print(_isLoadingremoveImage.toString());
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -240,9 +248,9 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
 
                   GridView.builder(
                       scrollDirection: Axis.vertical,
-                      itemCount: place.image.length,
+                      itemCount: place.gallery.length,
                       itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
-                        value: place.image[i],
+                        value: place.gallery[i],
                         child: Container(
                           height: deviceHeight * 0.15,
                           child: Stack(
@@ -250,20 +258,40 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
                               FadeInImage(
                                 placeholder: AssetImage(
                                     'assets/images/tapsalon_icon_200.png'),
-                                image: NetworkImage(place.image[i].url.medium),
-                                fit: BoxFit.cover,
+                                image: NetworkImage(
+                                  place.gallery[i].url.medium,
+                                ),
+                                fit: BoxFit.fill,
                               ),
                               Positioned(
                                 top: 5,
                                 right: 5,
                                 child: InkWell(
                                   onTap: () {
-                                    removeImage(place.image[i].id);
+                                    removeImage(place.gallery[i].id);
                                   },
                                   child: Card(
                                     color: Colors.white.withOpacity(0.3),
                                     child: Icon(Icons.clear,
                                         size: 25, color: Colors.black),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 5,
+                                left: 5,
+                                child: Card(
+                                  color: Colors.white.withOpacity(0.3),
+                                  child: Checkbox(
+                                    onChanged: (value) {
+                                      selectedImageId = place.gallery[i].id;
+                                      print(selectedImageId);
+                                      setState(() {});
+                                    },
+                                    value:
+                                        selectedImageId == place.gallery[i].id
+                                            ? true
+                                            : false,
                                   ),
                                 ),
                               ),
@@ -299,6 +327,15 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          print(selectedImageId);
+
+//          editComplex().then((v) {
+//            Navigator.of(context).pop();
+//          });
+        },
       ),
       endDrawer: Theme(
         data: Theme.of(context).copyWith(

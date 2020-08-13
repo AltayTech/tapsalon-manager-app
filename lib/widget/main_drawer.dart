@@ -3,14 +3,15 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tapsalon_manager/models/app_theme.dart';
-import 'package:tapsalon_manager/provider/auth_manager.dart';
-import 'package:tapsalon_manager/screen/about_us_screen.dart';
-import 'package:tapsalon_manager/screen/contact_with_us_screen.dart';
-import 'package:tapsalon_manager/screen/favorite_screen.dart';
-import 'package:tapsalon_manager/screen/manager_profile/login_screen_manager.dart';
-import 'package:tapsalon_manager/screen/manager_profile/manager_profile_screen.dart';
-import 'package:tapsalon_manager/screen/rules_screen.dart';
+import 'package:tapsalon_manager/screen/navigation_bottom_screen.dart';
+import 'package:tapsalon_manager/screen/place_detail/place_create_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../provider/app_theme.dart';
+import '../provider/auth.dart';
+import '../screen/about_us_screen.dart';
+import '../screen/user_profile/login_screen.dart';
+import '../screen/user_profile/profile_screen.dart';
 
 class MainDrawer extends StatelessWidget {
   Widget buildListTile(String title, IconData icon, Function tapHandler) {
@@ -29,68 +30,72 @@ class MainDrawer extends StatelessWidget {
       onTap: tapHandler,
     );
   }
-
+  _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
     double deviceWidth = MediaQuery.of(context).size.width;
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    Color textColor = Colors.white;
-    Color iconColor = Colors.white38;
+    Color textColor = Colors.black;
+    Color iconColor = AppTheme.grey;
+
     return Drawer(
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Container(
           child: Stack(
             children: <Widget>[
-              Container(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX: 5,
-                    sigmaY: 5,
-                  ),
-                  child: Container(color: Colors.black.withOpacity(0.3)),
-                ),
-              ),
-
               Wrap(
                 children: <Widget>[
-                  Stack(
-                    children: <Widget>[
-//                      Image.asset(
-////                        'assets/images/drawer_header.jpg',
-////                        fit: BoxFit.fill,
-////                      ),
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(20),
-                        alignment: Alignment.center,
-                        color: Colors.purpleAccent.withOpacity(0.1),
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 20.0),
-                          child: Text(
-                            'تاپ سالن',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 24,
-                                color: Colors.white),
-                            textAlign: TextAlign.center,
+                  Container(
+                    height: deviceHeight * 0.20,
+                    child: Stack(
+                      children: <Widget>[
+                        Container(
+                            width: double.infinity,
+                            alignment: Alignment.center,
+//                          color: Colors.purpleAccent.withOpacity(0.1),
+                            child: Image.asset(
+                              'assets/images/login_header_pic.png',
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                            )),
+                        Positioned(
+                          top: deviceHeight * 0.080,
+                          right: 0,
+                          left: 0,
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Text(
+                              'تاپ سالن',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: textScaleFactor * 26,
+                                  fontFamily: "BFarnaz",
+                                  color: Colors.white),
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   SizedBox(
                     height: 10,
                   ),
-                  Consumer<AuthManager>(
+                  Consumer<Auth>(
                     builder: (_, auth, ch) => ListTile(
                       title: Text(
-                        auth.isAuthM ? 'پروفایل مدیر' : 'ورود مدیر',
+                        auth.isAuth ? 'پروفایل' : 'ورود',
                         style: TextStyle(
                           fontFamily: "Iransans",
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                          fontSize: textScaleFactor * 15,
                           color: textColor,
                         ),
                         textAlign: TextAlign.right,
@@ -101,16 +106,13 @@ class MainDrawer extends StatelessWidget {
                       ),
                       onTap: () {
                         Navigator.of(context).pop();
-                        auth.isAuthM
+                        auth.isAuth
                             ? Navigator.of(context)
-                                .pushNamed(ManagerProfileScreen.routeName)
+                                .pushNamed(ProfileScreen.routeName)
                             : Navigator.of(context)
-                                .pushNamed(LoginScreenManager.routeName);
+                                .pushNamed(LoginScreen.routeName);
                       },
                     ),
-                  ),
-                  Divider(
-                    thickness: 2,
                   ),
                   Container(
                     height: deviceHeight * 0.64,
@@ -123,7 +125,7 @@ class MainDrawer extends StatelessWidget {
                               style: TextStyle(
                                 fontFamily: "Iransans",
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: textScaleFactor * 15,
                                 color: textColor,
                               ),
                               textAlign: TextAlign.right,
@@ -134,90 +136,71 @@ class MainDrawer extends StatelessWidget {
                             ),
                             onTap: () {
                               Navigator.of(context).pop();
-
-                              Navigator.of(context)
-                                  .pushNamed('/navigationScreen');
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  NavigationBottomScreen.routeName,
+                                  (Route<dynamic> route) => false);
                             },
                           ),
                           ListTile(
                             title: Text(
-                              'مجموعه های مورد علاقه',
+                              'ایجاد مکان های ورزشی',
                               style: TextStyle(
                                 fontFamily: "Iransans",
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: textScaleFactor * 15,
                                 color: textColor,
                               ),
                               textAlign: TextAlign.right,
                             ),
                             trailing: Icon(
-                              Icons.favorite,
+                              Icons.search,
                               color: iconColor,
                             ),
                             onTap: () {
                               Navigator.of(context).pop();
 
-                              Navigator.of(context)
-                                  .pushNamed(FavoriteScreen.routeName);
+                              Navigator.of(context).pushNamed(
+                                  PlaceCreateScreen.routeName,
+                             );
                             },
                           ),
+
                           ListTile(
                             title: Text(
-                              'راهنما',
+                              'معرفی مکان ورزشی',
                               style: TextStyle(
                                 fontFamily: "Iransans",
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: textScaleFactor * 15,
                                 color: textColor,
                               ),
                               textAlign: TextAlign.right,
                             ),
                             trailing: Icon(
-                              Icons.help,
+                              Icons.store,
                               color: iconColor,
                             ),
                             onTap: () {
                               Navigator.of(context).pop();
 
-                              Navigator.of(context)
-                                  .pushNamed(RulesScreen.routeName);
+                             _launchURL('https://tapsalon.ir/%d8%ab%d8%a8%d8%aa-%d9%85%da%a9%d8%a7%d9%86-%d9%88%d8%b1%d8%b2%d8%b4%db%8c/');
                             },
                           ),
-                          ListTile(
-                            title: Text(
-                              'تماس با ما',
-                              style: TextStyle(
-                                fontFamily: "Iransans",
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
-                                color: textColor,
-                              ),
-                              textAlign: TextAlign.right,
-                            ),
-                            trailing: Icon(
-                              Icons.contact_phone,
-                              color: iconColor,
-                            ),
-                            onTap: () {
-                              Navigator.of(context).pop();
 
-                              Navigator.of(context)
-                                  .pushNamed(ContactWithUs.routeName);
-                            },
-                          ),
+
                           ListTile(
                             title: Text(
                               'درباره ما',
                               style: TextStyle(
                                 fontFamily: "Iransans",
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                                fontSize: textScaleFactor * 15,
                                 color: textColor,
                               ),
                               textAlign: TextAlign.right,
                             ),
                             trailing: Icon(
-                              Icons.account_balance,
+                              Icons.info,
                               color: iconColor,
                             ),
                             onTap: () {
@@ -227,34 +210,23 @@ class MainDrawer extends StatelessWidget {
                                   .pushNamed(AboutUsScreen.routeName);
                             },
                           ),
-                          Divider(
-                            height: 1,
-                            color: AppTheme.grey.withOpacity(0.6),
-                          ),
+
                           ListTile(
                             title: Text(
-                              'خروج',
+                              'خروج از حساب کاربری',
                               style: TextStyle(
                                 fontFamily: 'Iransans',
-                                fontSize: textScaleFactor * 13.0,
+                                fontSize: textScaleFactor * 15.0,
                                 color: textColor,
                               ),
                               textAlign: TextAlign.right,
                             ),
                             trailing: Icon(
                               Icons.power_settings_new,
-                              color: Colors.red,
+                              color: iconColor,
                             ),
                             onTap: () async {
-//                              Provider.of<CustomerInfo>(context).customer =
-//                                  Provider.of<CustomerInfo>(context)
-//                                      .customer_zero;
-//
-                              Provider.of<AuthManager>(context, listen: false)
-                                  .tokenM = '';
-
-                              await Provider.of<AuthManager>(context,
-                                      listen: false)
+                              await Provider.of<Auth>(context, listen: false)
                                   .removeToken();
                               Navigator.of(context).pushNamed('/');
                             },
@@ -265,41 +237,6 @@ class MainDrawer extends StatelessWidget {
                   ),
                 ],
               ),
-//        ),
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  color: Colors.black54,
-                  child: Column(
-                    children: <Widget>[
-                      Divider(
-                        height: 1,
-                        color: AppTheme.grey.withOpacity(0.6),
-                      ),
-                      Text(
-                        'طراحی شده در تبریزاپس ',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Iransans',
-                          color: textColor,
-                          fontSize: textScaleFactor * 11.0,
-                        ),
-                      ),
-                      Text(
-                        'www.tabrizapps.ir',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Iransans',
-                          color: Colors.green,
-                          fontSize: textScaleFactor * 11.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
             ],
           ),
         ),

@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-
-import 'comment.dart';
+import '../models/comment.dart';
 
 class MainComments with ChangeNotifier {
   final int current_page;

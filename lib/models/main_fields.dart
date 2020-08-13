@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
-
-import 'field.dart';
+import '../models/field.dart';
 
 class MainFields with ChangeNotifier {
   final int current_page;

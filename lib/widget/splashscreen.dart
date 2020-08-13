@@ -7,6 +7,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 class SplashScreen extends StatefulWidget {
   final int seconds;
   final Text title;
+  final Text subtitle;
   final Color backgroundColor;
   final TextStyle styleTextUnderTheLoader;
   final dynamic navigateAfterSeconds;
@@ -25,6 +26,7 @@ class SplashScreen extends StatefulWidget {
       this.onClick,
       this.navigateAfterSeconds,
       this.title = const Text(''),
+      this.subtitle = const Text(''),
       this.backgroundColor = Colors.white,
       this.styleTextUnderTheLoader = const TextStyle(
           fontSize: 18.0, fontWeight: FontWeight.bold, color: Colors.black),
@@ -43,8 +45,6 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Timer(Duration(seconds: widget.seconds), () {
       if (widget.navigateAfterSeconds is String) {
-        // It's fairly safe to assume this is using the in-built material
-        // named route component
         Navigator.of(context).pushReplacementNamed(widget.navigateAfterSeconds);
       } else if (widget.navigateAfterSeconds is Widget) {
         Navigator.of(context).pushReplacement(new MaterialPageRoute(
@@ -65,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen> {
           fit: StackFit.expand,
           children: <Widget>[
             new Container(
-              height:MediaQuery.of(context).size.height,
+              height: MediaQuery.of(context).size.height,
               decoration: new BoxDecoration(
                 image: widget.imageBackground == null
                     ? null
@@ -80,8 +80,8 @@ class _SplashScreenState extends State<SplashScreen> {
             new Stack(
               alignment: Alignment.center,
               children: <Widget>[
-                 Positioned(
-                   top:MediaQuery.of(context).size.height*0.3,
+                Positioned(
+                  top: MediaQuery.of(context).size.height * 0.3,
                   child: new Container(
                       child: new Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -89,20 +89,23 @@ class _SplashScreenState extends State<SplashScreen> {
                       new CircleAvatar(
                         backgroundColor: Colors.transparent,
                         child: new Container(
-                            height:MediaQuery.of(context).size.height*0.25,
-
+                            height: MediaQuery.of(context).size.height * 0.18,
                             child: widget.image),
                         radius: widget.photoSize,
                       ),
                       new Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
+                        padding:  EdgeInsets.only(top:  MediaQuery.of(context).size.height * 0.1),
                       ),
-                      widget.title
+                      widget.title,
+                      new Padding(
+                        padding: const EdgeInsets.only(top: 5.0),
+                      ),
+                      widget.subtitle
                     ],
                   )),
                 ),
                 Positioned(
-                  bottom:MediaQuery.of(context).size.height*0.04,
+                  bottom: MediaQuery.of(context).size.height * 0.04,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -113,14 +116,11 @@ class _SplashScreenState extends State<SplashScreen> {
                           return DecoratedBox(
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: index.isEven ? Colors.white : Colors.white,
+                              color:Color(0xffF2B107),
                             ),
                           );
                         },
                       ),
-//                      CircularProgressIndicator(
-//                        valueColor: new AlwaysStoppedAnimation<Color>(widget.loaderColor),
-//                      ),
                       Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                       ),

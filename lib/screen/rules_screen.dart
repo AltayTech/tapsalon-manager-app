@@ -5,13 +5,14 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
-import 'package:tapsalon_manager/models/app_theme.dart';
-import 'package:tapsalon_manager/provider/manager_info.dart';
-import 'package:tapsalon_manager/widget/main_drawer.dart';
+
 import '../models/rule_data.dart';
+import '../provider/app_theme.dart';
+import '../provider/user_info.dart';
+import '../widget/main_drawer.dart';
 
 class RulesScreen extends StatefulWidget {
-  static const routeName = '/rule_detail';
+  static const routeName = '/RulesScreen';
 
   @override
   _RulesScreenState createState() => _RulesScreenState();
@@ -29,7 +30,6 @@ class _RulesScreenState extends State<RulesScreen> {
       getRulesList();
     }
     _isInit = false;
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
   }
 
@@ -37,7 +37,6 @@ class _RulesScreenState extends State<RulesScreen> {
     setState(() {
       _isLoading = true;
     });
-//    await Provider.of<CustomerInfo>(context, listen: false).getRules();
     print(_isLoading.toString());
     print(_isLoading.toString());
 
@@ -47,26 +46,14 @@ class _RulesScreenState extends State<RulesScreen> {
     });
     print(_isLoading.toString());
   }
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
 
-  }
-
-  @override
-  void dispose() {
-    // TODO: implement dispose
-
-    super.dispose();
-  }
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
     double deviceWidth = MediaQuery.of(context).size.width;
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
     var currencyFormat = intl.NumberFormat.decimalPattern();
-    loadedruleList = Provider.of<ManagerInfo>(context).ruleList;
+    loadedruleList = Provider.of<UserInfo>(context).ruleList;
 
     return Scaffold(
       appBar: AppBar(
@@ -116,18 +103,17 @@ class _RulesScreenState extends State<RulesScreen> {
                       alignment: Alignment.center,
                       child: _isLoading
                           ? SpinKitFadingCircle(
-                        itemBuilder:
-                            (BuildContext context, int index) {
-                          return DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: index.isEven
-                                  ? AppTheme.spinerColor
-                                  : AppTheme.spinerColor,
-                            ),
-                          );
-                        },
-                      )
+                              itemBuilder: (BuildContext context, int index) {
+                                return DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: index.isEven
+                                        ? AppTheme.spinerColor
+                                        : AppTheme.spinerColor,
+                                  ),
+                                );
+                              },
+                            )
                           : Container()),
                 ),
               ],
@@ -139,7 +125,7 @@ class _RulesScreenState extends State<RulesScreen> {
         data: Theme.of(context).copyWith(
           // Set the transparency here
           canvasColor: Colors
-              .transparent, //or any other color you want. e.g Colors.blue.withOpacity(0.5)
+              .white, //or any other color you want. e.g Colors.blue.withOpacity(0.5)
         ),
         child: MainDrawer(),
       ),

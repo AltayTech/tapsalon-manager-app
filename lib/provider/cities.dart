@@ -3,18 +3,24 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tapsalon_manager/models/city.dart';
-import 'package:tapsalon_manager/models/ostan.dart';
+import 'package:tapsalon_manager/models/main_cities.dart';
+import 'package:tapsalon_manager/models/main_ostans.dart';
+import 'package:tapsalon_manager/models/main_regions.dart';
 import 'package:tapsalon_manager/models/region.dart';
-import 'package:tapsalon_manager/models/urls.dart';
+
+
+import '../models/city.dart';
+import '../models/province.dart';
+import '../provider/urls.dart';
 
 class Cities with ChangeNotifier {
-  City _selectedCity =
-      City(id: 0, ostan_id: 0, name: '', description: '', no_users: 0);
-
-  List<Region> _regionsItems = [];
-
-  List<Region> get regionsItems => _regionsItems;
+  City _selectedCity = City(
+    id: 0,
+    provinceId: 0,
+    name: '',
+//    description: '',
+//    noUsers: 0,
+  );
 
   City get selectedCity => _selectedCity;
 
@@ -22,16 +28,14 @@ class Cities with ChangeNotifier {
     _selectedCity = value;
   }
 
-  List<City> _citiesItems = [
-    City(id: 0, ostan_id: 0, name: 'aaaaaaa', description: '', no_users: 0)
-  ];
-  List<Ostan> _ostansItems = [
-    Ostan(id: 0, name: '', description: '', no_users: 0)
-  ];
+  List<City> _citiesItems = [];
+  List<Province> _provincesItems = [];
 
   List<City> get citiesItems => _citiesItems;
 
-  List<Ostan> get ostansItems => _ostansItems;
+  List<Province> get provincesItems => _provincesItems;
+  List<Region> _itemsRegions = [];
+  List<Region> get itemsRegions => _itemsRegions;
 
   Future<void> setSelectedCity(City selectedCity) async {
     print('setSelectedCity');
@@ -54,15 +58,17 @@ class Cities with ChangeNotifier {
       print(url);
 
       try {
-        final response = await get(url);
+        final response = await get(url,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'version': Urls.versionCode
+          },);
 
         final extractedData = json.decode(response.body);
         print(extractedData);
 
         City dataRaw = City.fromJson(extractedData);
-
-//      print(dataRaw[0].description.toString());
-//      print(dataRaw[0].id.toString());
         _selectedCity = dataRaw;
 
         notifyListeners();
@@ -79,16 +85,18 @@ class Cities with ChangeNotifier {
     final url = Urls.rootUrl + Urls.citiesEndPoint;
 
     try {
-      final response = await get(url);
+      final response = await get(url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'version': Urls.versionCode
+        },);
 
-//      final extractedData = json.decode(response.body);
       Iterable extractedData = json.decode(response.body) as List;
       print(extractedData);
 
       List<City> dataRaw = extractedData.map((i) => City.fromJson(i)).toList();
 
-//      print(dataRaw[0].description.toString());
-//      print(dataRaw[0].id.toString());
       _citiesItems = dataRaw;
 
       notifyListeners();
@@ -98,10 +106,10 @@ class Cities with ChangeNotifier {
     }
   }
 
-  Future<void> retrieveOstanCities(int ostanId) async {
+  Future<void> retrieveOstanCities(int ostanId,{String havePlaces=''}) async {
     print('retrieveOstanCities');
 
-    final url = Urls.rootUrl + Urls.ostansEndPoint + '/$ostanId/cities';
+    final url = Urls.rootUrl + Urls.provincesEndPoint + '/$ostanId/cities'+'?have_places=$havePlaces';
     print(url);
 
     try {
@@ -110,18 +118,15 @@ class Cities with ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'version': Urls.versionCode
         },
       );
 
-      Iterable extractedData = json.decode(response.body) as List;
+      final extractedData = json.decode(response.body);
       print(extractedData);
+      MainCities dataRaw = MainCities.fromJson(extractedData);
 
-      List<City> dataRaw = extractedData.map((i) => City.fromJson(i)).toList();
-
-//      print(dataRaw[0].description.toString());
-//      print(dataRaw[0].id.toString());
-      _citiesItems.clear();
-      _citiesItems = dataRaw;
+      _citiesItems = dataRaw.data;
 
       notifyListeners();
     } catch (error) {
@@ -129,11 +134,10 @@ class Cities with ChangeNotifier {
       throw (error);
     }
   }
-
   Future<void> retrieveCityRegions(int cityId) async {
     print('retrieveCityRegions');
 
-    final url = Urls.rootUrl + Urls.citiesEndPoint + '/$cityId/regions';
+    final url = Urls.rootUrl + Urls.provincesEndPoint + '/$cityId/region';
     print(url);
 
     try {
@@ -142,16 +146,15 @@ class Cities with ChangeNotifier {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'version': Urls.versionCode
         },
       );
 
-      Iterable extractedData = json.decode(response.body) as List;
+      final extractedData = json.decode(response.body);
       print(extractedData);
+      MainCities dataRaw = MainCities.fromJson(extractedData);
 
-      List<Region> dataRaw =
-          extractedData.map((i) => Region.fromJson(i)).toList();
-      _regionsItems.clear();
-      _regionsItems = dataRaw;
+      _citiesItems = dataRaw.data;
 
       notifyListeners();
     } catch (error) {
@@ -160,23 +163,60 @@ class Cities with ChangeNotifier {
     }
   }
 
-  Future<void> retrieveOstans() async {
-    print('retrieveOstans');
+  Future<void> retrieveProvince({String havePlaces=''}) async {
+    print('retrieveProvince');
 
-    final url = Urls.rootUrl + Urls.ostansEndPoint;
+    final url = Urls.rootUrl + Urls.provincesEndPoint+'?have_places=$havePlaces';
+    print(url);
 
     try {
-      final response = await get(url);
+      final response = await get(url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'version': Urls.versionCode
+        },);
 
-      final extractedData = json.decode(response.body) as List;
+      final extractedData = json.decode(response.body);
       print(extractedData);
-      List<Ostan> dataRaw =
-          extractedData.map((i) => Ostan.fromJson(i)).toList();
+      MainOstans dataRaw = MainOstans.fromJson(extractedData);
 
-      print(dataRaw[0].description.toString());
-      _ostansItems = dataRaw;
-      print(_ostansItems[0].description.toString());
+      _provincesItems = dataRaw.data;
 
+      notifyListeners();
+    } catch (error) {
+      print(error.toString());
+      throw (error);
+    }
+  }
+
+  Future<void> retrieveRegions(int cityId) async {
+    print('retrieveRegions');
+
+    final url = Urls.rootUrl + '/api/cities/$cityId/regions';
+    print(url);
+
+    try {
+      final response = await get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'version': Urls.versionCode
+        },
+      );
+      if (response.statusCode == 200) {
+        final extractedData = json.decode(response.body);
+        print(extractedData);
+
+        MainRegions mainRegions = MainRegions.fromJson(extractedData);
+
+        _itemsRegions.clear();
+        _itemsRegions.addAll(mainRegions.data);
+
+      } else {
+        _itemsRegions = [];
+      }
       notifyListeners();
     } catch (error) {
       print(error.toString());
