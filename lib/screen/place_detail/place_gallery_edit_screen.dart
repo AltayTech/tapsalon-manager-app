@@ -5,6 +5,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
+import 'package:tapsalon_manager/models/image.dart';
 import 'package:tapsalon_manager/models/places_models/place.dart';
 import 'package:tapsalon_manager/provider/app_theme.dart';
 import 'package:tapsalon_manager/provider/places.dart';
@@ -21,17 +22,10 @@ class PlaceGalleryEditScreen extends StatefulWidget {
 class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
     with SingleTickerProviderStateMixin {
   var _isLoading = false;
+
   var _isLoadingremoveImage = false;
+
   bool _isInit = true;
-  TabController _tabController;
-
-  var title;
-
-  var image_url;
-
-  String stars;
-
-  bool isLike = false;
 
   Place place;
 
@@ -39,32 +33,28 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
 
   int selectedImageId;
 
-  @override
-  void initState() {
-    _tabController = TabController(vsync: this, length: 3);
-    _tabController.addListener(_handleTabSelection);
-    // TODO: implement initState
-    super.initState();
-  }
+  var placeId;
 
-  void _handleTabSelection() {
-    setState(() {});
-  }
+  List<ImageObj> gallery = [];
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     if (_isInit) {
       final Map arguments = ModalRoute.of(context).settings.arguments as Map;
 
+      placeId = arguments['placeId'];
+
       place = arguments['place'];
+
+      await Provider.of<Places>(context, listen: false).retrievePlace(placeId);
+
+      place = Provider.of<Places>(context, listen: false).itemPlace;
+
+      gallery = place.gallery;
     }
+
     _isInit = false;
+
     super.didChangeDependencies();
   }
 
@@ -72,7 +62,7 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
     print('addPicture');
 
     ImageSource imageSource =
-        await Provider.of<Places>(context, listen: false).imageSource;
+        Provider.of<Places>(context, listen: false).imageSource;
 
     print('imageSource');
 
@@ -87,10 +77,11 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
     setState(() {
       _isLoading = true;
     });
+
     await showDialog(
         context: context, builder: (ctx) => CustomDialogSelectImagePicker());
-    await addPicture(title);
-    print(_image.path);
+
+    await addPicture(place.name);
 
     if (_image != null) {
       await Provider.of<Places>(context, listen: false).uploadImage(
@@ -98,38 +89,58 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
         place.id,
       );
     }
-    await Provider.of<Places>(context, listen: false).retrievePlace(place.id);
+
+    await Provider.of<Places>(context, listen: false).retrievePlace(placeId);
+
     place = Provider.of<Places>(context, listen: false).itemPlace;
+
+    gallery = place.gallery;
+
+    Provider.of<Places>(context, listen: false).placeInSend.gallery =
+        getIdList(gallery);
+
+    Provider.of<Places>(context, listen: false).placeInSend.id=place.id;
+
     setState(() {
       _isLoading = false;
-      print(_isLoading.toString());
     });
-    print(_isLoading.toString());
   }
 
-  Future<void> removeImage(int imageId) async {
+  Future<void> removeImage(ImageObj image) async {
     setState(() {
       _isLoadingremoveImage = true;
     });
 
-    await Provider.of<Places>(context, listen: false).deleteImage(imageId);
+    await Provider.of<Places>(context, listen: false).deleteImage(image.id);
 
-    await Provider.of<Places>(context, listen: false).retrievePlace(place.id);
-    place = Provider.of<Places>(context, listen: false).itemPlace;
+    await gallery.removeAt(gallery.indexOf(image));
+
+    Provider.of<Places>(context, listen: false).placeInSend.gallery =
+        getIdList(gallery);
+
     setState(() {
       _isLoadingremoveImage = false;
-      print(_isLoadingremoveImage.toString());
     });
-    print(_isLoadingremoveImage.toString());
   }
 
+  List<int> getIdList(List<dynamic> list) {
+    List<int> idList = [];
 
+    for (int i = 0; i < list.length; i++) {
+      idList.add(list[i].id);
+    }
+
+    return idList;
+  }
 
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
+
     double deviceWidth = MediaQuery.of(context).size.width;
+
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
+
     var currencyFormat = intl.NumberFormat.decimalPattern();
 
     return Scaffold(
@@ -139,53 +150,28 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
       ),
       body: Directionality(
         textDirection: TextDirection.rtl,
-        child: Column(
-          children: <Widget>[
-            FittedBox(
-              child: FlatButton(
-                color: Colors.green,
-                onPressed: () {
-                  getImage();
-                },
-                child: Row(
-                  children: <Widget>[
-                    Icon(
-                      Icons.add,
-                      color: Colors.white,
-                      size: 16,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            width: double.infinity,
+            height: deviceHeight * 0.8,
+            child: _isLoading
+                ? Align(
+                    alignment: Alignment.center,
+                    child: SpinKitFadingCircle(
+                      itemBuilder: (BuildContext context, int index) {
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index.isEven
+                                ? AppTheme.spinerColor
+                                : AppTheme.spinerColor,
+                          ),
+                        );
+                      },
                     ),
-                    Text(
-                      'افزودن عکس',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Iransans',
-                        fontSize: textScaleFactor * 14.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              width: double.infinity,
-              height: deviceHeight * 0.8,
-              child: _isLoading
-                  ? Align(
-                      alignment: Alignment.center,
-                      child: SpinKitFadingCircle(
-                        itemBuilder: (BuildContext context, int index) {
-                          return DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: index.isEven
-                                  ? AppTheme.spinerColor
-                                  : AppTheme.spinerColor,
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                  :
+                  )
+                :
 //              AnimatedList(itemBuilder: (ctx, i, animation) {
 //                      return ChangeNotifierProvider.value(
 //                        value: place.image[i],
@@ -246,96 +232,95 @@ class _PlaceGalleryEditScreenState extends State<PlaceGalleryEditScreen>
 //                      );
 //                    }),
 
-                  GridView.builder(
-                      scrollDirection: Axis.vertical,
-                      itemCount: place.gallery.length,
-                      itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
-                        value: place.gallery[i],
-                        child: Container(
-                          height: deviceHeight * 0.15,
-                          child: Stack(
-                            children: <Widget>[
-                              FadeInImage(
-                                placeholder: AssetImage(
-                                    'assets/images/tapsalon_icon_200.png'),
-                                image: NetworkImage(
-                                  place.gallery[i].url.medium,
-                                ),
-                                fit: BoxFit.fill,
+                GridView.builder(
+                    scrollDirection: Axis.vertical,
+                    itemCount: place.gallery.length,
+                    itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
+                      value: place.gallery[i],
+                      child: Container(
+                        height: deviceHeight * 0.15,
+                        child: Stack(
+                          children: <Widget>[
+                            FadeInImage(
+                              placeholder: AssetImage(
+                                  'assets/images/tapsalon_icon_200.png'),
+                              image: NetworkImage(
+                                place.gallery[i].url.medium,
                               ),
-                              Positioned(
-                                top: 5,
-                                right: 5,
-                                child: InkWell(
-                                  onTap: () {
-                                    removeImage(place.gallery[i].id);
-                                  },
-                                  child: Card(
-                                    color: Colors.white.withOpacity(0.3),
-                                    child: Icon(Icons.clear,
-                                        size: 25, color: Colors.black),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                top: 5,
-                                left: 5,
+                              fit: BoxFit.fill,
+                            ),
+                            Positioned(
+                              top: 5,
+                              right: 5,
+                              child: InkWell(
+                                onTap: () {
+                                  removeImage(place.gallery[i]);
+                                },
                                 child: Card(
                                   color: Colors.white.withOpacity(0.3),
-                                  child: Checkbox(
-                                    onChanged: (value) {
-                                      selectedImageId = place.gallery[i].id;
-                                      print(selectedImageId);
-                                      setState(() {});
-                                    },
-                                    value:
-                                        selectedImageId == place.gallery[i].id
-                                            ? true
-                                            : false,
-                                  ),
+                                  child: Icon(Icons.clear,
+                                      size: 25, color: Colors.white),
                                 ),
                               ),
-                              _isLoadingremoveImage
-                                  ? Align(
-                                      alignment: Alignment.center,
-                                      child: SpinKitFadingCircle(
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return DecoratedBox(
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: index.isEven
-                                                  ? AppTheme.spinerColor
-                                                  : AppTheme.spinerColor,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    )
-                                  : Container(),
-                            ],
-                          ),
+                            ),
+                            Positioned(
+                              top: 5,
+                              left: 5,
+                              height: 35,
+                              width: 35,
+                              child: Card(
+                                color: Colors.white.withOpacity(0.3),
+                                child: Checkbox(
+                                  onChanged: (value) {
+                                    selectedImageId = place.gallery[i].id;
+                                    setState(() {});
+                                  },
+                                  value: selectedImageId == place.gallery[i].id
+                                      ? true
+                                      : false,
+                                ),
+                              ),
+                            ),
+                            _isLoadingremoveImage
+                                ? Align(
+                                    alignment: Alignment.center,
+                                    child: SpinKitFadingCircle(
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: index.isEven
+                                                ? AppTheme.spinerColor
+                                                : AppTheme.spinerColor,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : Container(),
+                          ],
                         ),
                       ),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.3,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                      ),
                     ),
-            ),
-          ],
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 1.3,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                  ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print(selectedImageId);
-
-//          editComplex().then((v) {
-//            Navigator.of(context).pop();
-//          });
+          getImage();
         },
+        child: Icon(
+          Icons.add,
+          size: 35,
+        ),
       ),
       endDrawer: Theme(
         data: Theme.of(context).copyWith(

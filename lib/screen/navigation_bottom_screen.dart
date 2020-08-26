@@ -2,18 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:provider/provider.dart';
 
-import '../models/city.dart';
 import '../provider/app_theme.dart';
-import '../provider/cities.dart';
 import '../provider/strings.dart';
 import '../screen/home_screen.dart';
 import '../screen/map_screen.dart';
 import '../screen/user_profile/profile_view.dart';
 import '../widget/dialogs/custom_dialog_enter.dart';
 import '../widget/main_drawer.dart';
-import '../widget/dialogs/select_city_dialog.dart';
 
 class NavigationBottomScreen extends StatefulWidget {
   static const routeName = '/NavigationBottomScreen';
@@ -24,7 +20,7 @@ class NavigationBottomScreen extends StatefulWidget {
 
 class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  var init = true;
+
   DateTime currentBackPressTime;
 
   final List<Map<String, Object>> _pages = [
@@ -36,7 +32,6 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
       'page': MapScreen(),
       'title': Strings.naveNearby,
     },
-
     {
       'page': ProfileView(),
       'title': Strings.navProfile,
@@ -63,36 +58,17 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
             ));
   }
 
-  @override
-  void didChangeDependencies() async {
-    if (init) {
-      await Provider.of<Cities>(context, listen: false).getSelectedCity();
-      City selectedCity =
-          Provider.of<Cities>(context, listen: false).selectedCity;
-      if (selectedCity.id == 0) {
-        WidgetsBinding.instance.addPostFrameCallback((_) async {
-          await showDialog<String>(
-              context: context, builder: (ctx) => SelectCityDialog());
-        });
-      }
-      init = false;
-    }
-    super.didChangeDependencies();
-  }
-
   Future<bool> onWillPop() async {
     if (_scaffoldKey.currentState.isDrawerOpen) {
-
       Navigator.pop(context);
 
       return false;
-    } else {
 
+    } else {
       DateTime now = DateTime.now();
 
       if (currentBackPressTime == null ||
           now.difference(currentBackPressTime) > Duration(seconds: 2)) {
-
         currentBackPressTime = now;
 
         FToast(context).showToast(
@@ -115,8 +91,10 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
             ),
           ),
         );
+
         return Future.value(false);
       }
+
       return Future.value(true);
     }
   }
@@ -126,7 +104,7 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
     double deviceHeight = MediaQuery.of(context).size.height;
     double deviceWidth = MediaQuery.of(context).size.width;
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    var currencyFormat = intl.NumberFormat.decimalPattern();
+
 
     return WillPopScope(
       onWillPop: onWillPop,
@@ -138,40 +116,6 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
             backgroundColor: AppTheme.appBarColor,
             elevation: 0,
             iconTheme: IconThemeData(color: AppTheme.appBarIconColor),
-            actions: <Widget>[
-              Consumer<Cities>(
-                builder: (_, cities, ch) => Padding(
-                  padding: const EdgeInsets.only(left: 20.0),
-                  child: InkWell(
-                    onTap: () {
-                      showDialog(
-                          context: context,
-                          builder: (ctx) => SelectCityDialog());
-                    },
-                    child: Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Text(
-                            cities.selectedCity.name,
-                            softWrap: true,
-                            style: TextStyle(
-                                color: AppTheme.black,
-                                fontFamily: 'Iransans',
-                                fontSize: textScaleFactor * 12.0),
-                          ),
-                          Icon(
-                            Icons.arrow_drop_down,
-                            size: 25,
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
           drawer: Theme(
             data: Theme.of(context).copyWith(
@@ -196,6 +140,7 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
             unselectedItemColor: AppTheme.grey,
             selectedItemColor: AppTheme.BNbSelectedItemColor,
             currentIndex: _selectedPageIndex,
+            type: BottomNavigationBarType.fixed,
             items: [
               BottomNavigationBarItem(
                 backgroundColor: AppTheme.white,
@@ -213,7 +158,6 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
                   Strings.naveNearby,
                 ),
               ),
-
               BottomNavigationBarItem(
                 backgroundColor: AppTheme.white,
                 icon: Icon(Icons.account_circle),

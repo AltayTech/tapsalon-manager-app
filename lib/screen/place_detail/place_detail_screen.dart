@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
-import 'package:tapsalon_manager/models/image.dart';
 import 'package:tapsalon_manager/models/places_models/place.dart';
-import 'package:tapsalon_manager/provider/auth.dart';
-import 'package:tapsalon_manager/screen/place_detail/place_detail_info_edit_screen.dart';
+import 'package:tapsalon_manager/screen/place_detail/place_detail_comments_screen.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_detail_info_screen.dart';
+import 'package:tapsalon_manager/screen/place_detail/place_detail_timing_screen.dart';
 
 import '../../provider/app_theme.dart';
 import '../../provider/places.dart';
@@ -29,7 +28,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
 
   int _current = 0;
 
-  List<ImageObj> gallery = [];
+//  List<ImageObj> gallery = [];
 
   TabController _tabController;
 
@@ -59,25 +58,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
       int tabIndex = 0;
       _tabController.index = tabIndex;
 
-      ImageObj placeDefaultImage =
-          Provider.of<Places>(context, listen: false).placeDefaultImage;
-      var gymDefaultImage =
-          Provider.of<Places>(context, listen: false).gymDefaultImage;
-      var entDefaultImage =
-          Provider.of<Places>(context, listen: false).entDefaultImage;
-
       await searchItems();
-
-      if (loadedPlace.gallery.length < 1) {
-        gallery.clear();
-        gallery.add(loadedPlace.placeType.id == 2
-            ? gymDefaultImage
-            : loadedPlace.placeType.id == 4
-                ? entDefaultImage
-                : placeDefaultImage);
-      } else {
-        gallery = loadedPlace.gallery;
-      }
 
       setState(() {});
     }
@@ -89,23 +70,31 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
     setState(() {
       _isLoading = true;
     });
+
     final Map arguments = ModalRoute.of(context).settings.arguments as Map;
+
     final placeId = arguments != null ? arguments['placeId'] : 0;
 
     await Provider.of<Places>(context, listen: false).retrievePlace(placeId);
+
     loadedPlace = Provider.of<Places>(context, listen: false).itemPlace;
+
     setState(() {
       _isLoading = false;
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
+
     double deviceWidth = MediaQuery.of(context).size.width;
+
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
+
     var currencyFormat = intl.NumberFormat.decimalPattern();
-    bool isLogin = Provider.of<Auth>(context, listen: false).isAuth;
+
     final List<Tab> myTabs = <Tab>[
       Tab(
         child: Padding(
@@ -121,7 +110,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            'زمانبندی',
+            'زمان بندی',
             style: TextStyle(
                 fontFamily: 'Iransans', fontSize: textScaleFactor * 16.0),
           ),
@@ -148,6 +137,9 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
         ),
       ),
     ];
+
+    loadedPlace = Provider.of<Places>(context).itemPlace;
+
     return Scaffold(
       backgroundColor: AppTheme.bg,
       appBar: AppBar(
@@ -180,65 +172,63 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
             )
           : Container(
               height: deviceHeight * 0.9,
-              child: Column(
-                children: [
-                  Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: TabBar(
-                        indicator: BoxDecoration(
-                          color: AppTheme.white,
-                        ),
-                        indicatorWeight: 0,
-                        unselectedLabelColor: AppTheme.grey,
-                        labelColor: AppTheme.black,
-                        labelPadding: EdgeInsets.only(top: 2, left: 4),
-                        labelStyle: TextStyle(
-                          fontFamily: 'Iransans',
-                          fontWeight: FontWeight.w500,
-                          fontSize: textScaleFactor * 15.0,
-                        ),
-                        unselectedLabelStyle: TextStyle(
-                          fontFamily: 'Iransans',
-                          fontSize: textScaleFactor * 14.0,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        controller: _tabController,
-                        tabs: myTabs),
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        PlaceDetailInfoScreen(loadedPlace),
-                        Container(
-                          child: Text('2'),
-                        ),
-                        Container(
-                          child: Text('3'),
-                        ),
-                        Container(
-                          child: Text('4'),
-                        ),
-                      ],
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: TabBar(
+                          indicator: BoxDecoration(
+                            color: AppTheme.white,
+                          ),
+                          indicatorWeight: 0,
+                          unselectedLabelColor: AppTheme.grey,
+                          labelColor: AppTheme.black,
+                          labelPadding: EdgeInsets.only(top: 2, left: 4),
+                          labelStyle: TextStyle(
+                            fontFamily: 'Iransans',
+                            fontWeight: FontWeight.w500,
+                            fontSize: textScaleFactor * 15.0,
+                          ),
+                          unselectedLabelStyle: TextStyle(
+                            fontFamily: 'Iransans',
+                            fontSize: textScaleFactor * 14.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          controller: _tabController,
+                          tabs: myTabs),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: _isLoading
+                          ? SpinKitFadingCircle(
+                        itemBuilder: (BuildContext context, int index) {
+                          return DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: index.isEven
+                                  ? AppTheme.spinerColor
+                                  : AppTheme.spinerColor,
+                            ),
+                          );
+                        },
+                      )
+                          : TabBarView(
+                        controller: _tabController,
+                        children: [
+                          PlaceDetailInfoScreen(),
+                          PlaceDetailTimingScreen(),
+                          PlaceDetailCommentsScreen(),
+                          Container(
+                            child: Text('4'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context)
-              .pushNamed(PlaceDetailInfoEditScreen.routeName, arguments: {
-            'place': loadedPlace,
-          });
-        },
-        backgroundColor: AppTheme.buttonColor,
-        child: Icon(
-          Icons.check,
-          color: AppTheme.white,
-        ),
-      ),
       endDrawer: Theme(
         data: Theme.of(context).copyWith(
             // Set the transparency here

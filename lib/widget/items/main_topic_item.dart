@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tapsalon_manager/provider/app_theme.dart';
+import 'package:tapsalon_manager/widget/en_to_ar_number_convertor.dart';
 
 class MainTopicItem extends StatelessWidget {
   const MainTopicItem({
@@ -8,7 +9,7 @@ class MainTopicItem extends StatelessWidget {
     @required this.number,
     @required this.bgColor,
     @required this.icon,
-    @required this.iconColor,
+    this.iconColor,
   }) : super(key: key);
 
   final int number;
@@ -20,8 +21,7 @@ class MainTopicItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.29,
-      height: MediaQuery.of(context).size.width * 0.29,
+      height: 110,
       decoration: BoxDecoration(
           color: bgColor,
           boxShadow: [
@@ -36,12 +36,12 @@ class MainTopicItem extends StatelessWidget {
             ),
 
           ],
-          borderRadius: new BorderRadius.all(Radius.circular(25))),
+          borderRadius: new BorderRadius.all(Radius.circular(2))),
       child: LayoutBuilder(
         builder: (_, constraint) => Column(
           children: <Widget>[
             Expanded(
-              flex: 3,
+              flex: 5,
               child: Align(
                 alignment: Alignment.bottomCenter,
 
@@ -57,27 +57,35 @@ class MainTopicItem extends StatelessWidget {
               ),
             ),
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Align(
-                alignment: Alignment.topCenter,
+                alignment: Alignment.center,
                 child: FittedBox(
                   child: Padding(
                     padding: const EdgeInsets.only(top:12.0),
                     child: Text(
-                      title,
+                        EnArConvertor().replaceArNumber(number.toString())  ,
                         style:AppTheme.textTheme.subtitle1
 
-
-//                      TextStyle(
-//                        color: AppTheme.black.withOpacity(0.7),
-//                        fontFamily: 'Iransans',
-//                        fontWeight: FontWeight.w600,
-//                        fontSize: MediaQuery.of(context).textScaleFactor * 14.0,
-//                      ),
                     ),
                   ),
                 ),
               ),
+
+            ),
+            Expanded(
+              flex: 2,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: FittedBox(
+                  child: Text(
+                     title,
+                      style:AppTheme.textTheme.subtitle1.copyWith(fontSize: 12)
+
+                  ),
+                ),
+              ),
+
             ),
           ],
         ),

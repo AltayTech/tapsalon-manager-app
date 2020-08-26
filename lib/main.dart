@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_create_screen.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_detail_info_edit_screen.dart';
+import 'package:tapsalon_manager/screen/place_detail/place_detail_screen_test.dart';
+import 'package:tapsalon_manager/screen/place_detail/place_detail_timing_edit_screen.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_gallery_edit_screen.dart';
 
 import './provider/auth.dart';
@@ -21,9 +23,7 @@ import 'najva.dart';
 import 'provider/app_theme.dart';
 import 'provider/cities.dart';
 import 'screen/place_detail/comment_create_screen.dart';
-import 'screen/place_detail/place_detail_comments_screen.dart';
 import 'screen/place_detail/place_detail_screen.dart';
-import 'screen/place_detail/place_detail_timing_screen.dart';
 import 'screen/place_detail/place_location_screen.dart';
 import 'screen/user_profile/profile_screen.dart';
 import 'screen/user_profile/user_detail_info_edit_screen.dart';
@@ -97,15 +97,14 @@ class _MyAppState extends State<MyApp> {
             UserDetailInfoScreen.routeName: (ctx) => UserDetailInfoScreen(),
             UserDetailReserveScreen.routeName: (ctx) =>
                 UserDetailReserveScreen(),
-            PlaceDetailTimingScreen.routeName: (ctx) =>
-                PlaceDetailTimingScreen(),
-            PlaceDetailCommentsScreen.routeName: (ctx) =>
-                PlaceDetailCommentsScreen(),
             PlaceLocationScreen.routeName: (ctx) => PlaceLocationScreen(),
             PlaceCreateScreen.routeName: (ctx) => PlaceCreateScreen(),
             PlaceDetailInfoEditScreen.routeName: (ctx) =>
                 PlaceDetailInfoEditScreen(),
             PlaceGalleryEditScreen.routeName: (ctx) => PlaceGalleryEditScreen(),
+            PlaceDetailScreenTest.routeName: (ctx) => PlaceDetailScreenTest(),
+            PlaceDetailTimingEditScreen.routeName: (ctx) =>
+                PlaceDetailTimingEditScreen(),
           },
         ));
   }

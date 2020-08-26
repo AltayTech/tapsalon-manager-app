@@ -2,12 +2,12 @@ import 'package:flutter/foundation.dart';
 
 class Timing with ChangeNotifier {
   final int id;
-  final int place_id;
-  final String gender;
-  final String date_start;
-  final String date_end;
-  final int discount;
-  final int reservable;
+   int place_id;
+   String gender;
+   String date_start;
+   String date_end;
+   int discount;
+   int reservable;
   final String created_at;
   final String updated_at;
 
@@ -37,5 +37,18 @@ class Timing with ChangeNotifier {
       updated_at:
           parsedJson['updated_at'] != null ? parsedJson['updated_at'] : '0',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+//      'place_id': place_id,
+      'gender': gender,
+      'start': date_start,
+      'end': date_end,
+      'discount': discount,
+      'reservable': reservable,
+
+    };
   }
 }

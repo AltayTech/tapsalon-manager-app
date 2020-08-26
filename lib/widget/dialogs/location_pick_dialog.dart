@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:tapsalon_manager/models/places_models/place.dart';
+import 'package:tapsalon_manager/provider/app_theme.dart';
 import 'package:tapsalon_manager/provider/places.dart';
 
 class LocationPickDialog extends StatefulWidget {
@@ -41,9 +42,9 @@ class _LocationPickDialogState extends State<LocationPickDialog> {
   Place selectedPlace;
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     if (_isInit) {
-      searchItem();
+      await searchItem();
 
       _lastMapPosition =
           LatLng(selectedPlace.latitude, selectedPlace.longitude);
@@ -60,6 +61,7 @@ class _LocationPickDialogState extends State<LocationPickDialog> {
     await setCustomMapPin();
 
     _onAddMarker(selectedPlace.latitude, selectedPlace.longitude);
+    setState(() {});
   }
 
   void _onAddMarker(
@@ -166,6 +168,7 @@ class _LocationPickDialogState extends State<LocationPickDialog> {
   @override
   void initState() {
     super.initState();
+    setCustomMapPin();
 
     _geolocator = Geolocator();
     LocationOptions locationOptions =
@@ -176,7 +179,6 @@ class _LocationPickDialogState extends State<LocationPickDialog> {
     _geolocator.getPositionStream(locationOptions).listen((Position position) {
       _position = position;
     });
-    setCustomMapPin();
   }
 
   @override
@@ -248,23 +250,44 @@ class _LocationPickDialogState extends State<LocationPickDialog> {
           ),
           Positioned(
             child: Center(
-                child: Image.asset(
-              'assets/images/picker_marker_ic.png',
-              height: 45,
-              width: 45,
+                child: Padding(
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Image.asset(
+                'assets/images/picker_marker_ic.png',
+                height: 45,
+                width: 45,
+              ),
             )),
           ),
           Positioned(
-              bottom: 10,
-              left: 10,
-              right: 10,
-              child: RaisedButton(onPressed: (){
-                Provider.of<Places>(context,listen: false).latitude=_lastMapPosition.latitude;
-                Provider.of<Places>(context,listen:false).longitude=_lastMapPosition.longitude;
-                Navigator.pop(context);
+            bottom: 10,
+            left: 10,
+            right: 10,
+            height: 60,
+            child: RaisedButton(
+              color: AppTheme.buttonColor,
+              onPressed: () {
+                Provider.of<Places>(context, listen: false)
+                    .placeInSend
+                    .latitude = _lastMapPosition.latitude;
 
+                Provider.of<Places>(context, listen: false)
+                    .placeInSend
+                    .longitude = _lastMapPosition.longitude;
+
+                Navigator.pop(context);
               },
-              child: Text('انتخاب موقعیت'),)),
+              child: Text(
+                'انتخاب موقعیت',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: 'Iransans',
+                  color: AppTheme.white,
+                  fontSize: textScaleFactor * 14.0,
+                ),
+              ),
+            ),
+          ),
           Positioned(
               top: 0,
               bottom: 0,

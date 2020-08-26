@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tapsalon_manager/models/places_models/place_in_search.dart';
 import 'package:tapsalon_manager/models/searchDetails.dart';
 import 'package:tapsalon_manager/provider/app_theme.dart';
-import 'package:tapsalon_manager/provider/strings.dart';
+import 'package:tapsalon_manager/widget/en_to_ar_number_convertor.dart';
 import 'package:tapsalon_manager/widget/items/main_topic_item.dart';
 import 'package:tapsalon_manager/widget/items/place_item.dart';
 
@@ -20,13 +20,15 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _isInit = true;
+
   var _isLoading;
-  var _searchTextController = TextEditingController();
+
   int page = 1;
 
   SearchDetails searchDetails;
 
   List<PlaceInSearch> loadedPlaces = [];
+
   List<PlaceInSearch> loadedPlacesToList = [];
 
   ScrollController _scrollController = new ScrollController();
@@ -37,7 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
         page = page + 1;
+
         Provider.of<Places>(context, listen: false).sPage = page;
+
         searchItems();
       }
     });
@@ -51,7 +55,9 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     await Provider.of<Places>(context, listen: false).searchItem();
+
     loadedPlaces.clear();
+
     loadedPlaces = Provider.of<Places>(context, listen: false).items;
 
     loadedPlacesToList.addAll(loadedPlaces);
@@ -74,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Provider.of<Places>(context, listen: false).sPage = page;
 
       await searchItems();
+
       setState(() {
         _isLoading = false;
       });
@@ -82,81 +89,125 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didChangeDependencies();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
     double deviceWidth = MediaQuery.of(context).size.width;
     double textScaleFactor = MediaQuery.of(context).textScaleFactor;
-    print('deviceHeight' + deviceHeight.toString());
-    print('deviceWidth' + deviceWidth.toString());
 
     return Stack(
       children: [
         SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Container(
-//                height: deviceHeight * 0.18,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(0),
-                      color: AppTheme.white,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          MainTopicItem(
-                            number: 1,
-                            title: Strings.titleSalons,
-                            icon: 'assets/images/main_page_salon_ic.png',
-                            bgColor: AppTheme.bg,
-                            iconColor: AppTheme.mainPageColor,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: double.infinity,
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              top: 4.0, bottom: 4, left: 4),
+                          child: MainTopicItem(
+                            number: 4,
+                            title: 'مکان',
+                            icon: 'assets/images/main_page_place_ic.png',
+                            bgColor: AppTheme.white,
                           ),
-                          MainTopicItem(
-                            number: 1,
-                            title: Strings.titlClubs,
-                            icon: 'assets/images/main_page_gym_ic.png',
-                            bgColor: AppTheme.bg,
-                            iconColor: AppTheme.mainPageColor,
-                          ),
-                          MainTopicItem(
-                            number: 1,
-                            title: Strings.titleEntertainment,
-                            icon: 'assets/images/main_page_ent_ic.png',
-                            bgColor: AppTheme.bg,
-                            iconColor: AppTheme.mainPageColor,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: deviceHeight * 0.67,
-                    child: ListView.builder(
-                      controller: _scrollController,
-                      scrollDirection: Axis.vertical,
-                      itemCount: loadedPlacesToList.length,
-                      itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
-                        value: loadedPlacesToList[i],
-                        child: Container(
-                          height: 280,
-                          child: PlaceItem(
-                            place: loadedPlacesToList[i],
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: MainTopicItem(
+                            number: 15,
+                            title: 'نظر',
+                            icon: 'assets/images/main_page_comment_ic.png',
+                            bgColor: AppTheme.white,
                           ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: MainTopicItem(
+                            number: 200000,
+                            title: 'بازدید',
+                            icon: 'assets/images/main_page_visit_ic.png',
+                            bgColor: AppTheme.white,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              top: 4.0, bottom: 4, right: 4),
+                          child: MainTopicItem(
+                            number: 10000,
+                            title: 'لایک',
+                            icon: 'assets/images/main_page_like_ic.png',
+                            bgColor: AppTheme.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16, bottom: 0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'مکان های شما',
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontFamily: 'Iransans',
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                          fontSize: textScaleFactor * 16.0,
+                        ),
+                      ),
+                      Text(
+                        EnArConvertor().replaceArNumber(
+                            loadedPlacesToList.length.toString()),
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontFamily: 'Iransans',
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                          fontSize: textScaleFactor * 16.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: double.infinity,
+                  height: deviceHeight * 0.6,
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    scrollDirection: Axis.vertical,
+                    itemCount: loadedPlacesToList.length,
+                    itemBuilder: (ctx, i) => ChangeNotifierProvider.value(
+                      value: loadedPlacesToList[i],
+                      child: Container(
+                        height: 240,
+                        child: PlaceItem(
+                          place: loadedPlacesToList[i],
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
         Positioned(

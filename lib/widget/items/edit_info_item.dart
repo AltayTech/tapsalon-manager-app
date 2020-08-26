@@ -41,23 +41,37 @@ class EditInfoItem extends StatelessWidget {
               keyboardType: keybordType,
               onEditingComplete: () {},
               maxLines: null,
-
               textInputAction: TextInputAction.none,
               controller: controller,
               style: TextStyle(
-                color: Colors.black,
+                color: Colors.black87,
                 fontFamily: 'Iransans',
-                fontSize: textScaleFactor * 14.0,
+                fontSize: textScaleFactor * 15.0,
               ),
+              textAlign: TextAlign.start,
               decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+//                fillColor: Colors.white,
+//                filled: true,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(
+                    color: Colors.green,
+                  ),
                 ),
 
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide(
+                    color: Colors.green,
+                  ),
+                ),
+
+
+                alignLabelWithHint: true,
                 labelStyle: TextStyle(
-                  color: Colors.blue,
+                  color: Colors.grey,
                   fontFamily: 'Iransans',
-                  fontSize: textScaleFactor * 10.0,
+                  fontSize: textScaleFactor * 15.0,
                 ),
               ),
             ),

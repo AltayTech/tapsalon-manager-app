@@ -11,6 +11,7 @@ import 'package:tapsalon_manager/models/places_models/place.dart';
 import 'package:tapsalon_manager/models/places_models/place_in_send.dart';
 import 'package:tapsalon_manager/models/province.dart';
 import 'package:tapsalon_manager/models/region.dart';
+import 'package:tapsalon_manager/models/timing.dart';
 import 'package:tapsalon_manager/provider/auth.dart';
 import 'package:tapsalon_manager/provider/cities.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_gallery_edit_screen.dart';
@@ -106,6 +107,8 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
 
   List<Field> placeFieldsList = [];
 
+  List<ImageObj> placeGallery = [];
+
   @override
   void didChangeDependencies() async {
     if (_isInit) {
@@ -154,6 +157,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
 
       if (loadedPlace.province != null && loadedPlace.province.id != 0) {
         provinceValue = loadedPlace.province.name;
+
         provinceId = loadedPlace.province.id;
       }
 
@@ -182,10 +186,13 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
       await retrieveFacilities();
 
       placeInSend = convertPlace(loadedPlace);
+      Provider.of<Places>(context, listen: false).placeInSend = placeInSend;
 
       placeFacilitiesList = loadedPlace.facilities;
 
       placeFieldsList = loadedPlace.fields;
+
+      placeGallery = loadedPlace.gallery;
 
       setState(() {});
     }
@@ -222,22 +229,22 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
             ));
   }
 
-  Future<void> sendChange(PlaceInSend placeInSend) async {
+  Future<int> sendChange() async {
     setState(() {
       _isLoading = true;
     });
 
-    await Provider.of<Places>(context, listen: false)
-        .modifyPlace(placeInSend)
-        .then((value) async {
-      if (value != 0) {
-        _showLoginDialog();
-      } else {}
-    });
+    int placeId =
+        await Provider.of<Places>(context, listen: false).modifyPlace();
+
+    if (placeId != 0) {
+      _showLoginDialog();
+    } else {}
 
     setState(() {
       _isLoading = false;
     });
+    return placeId;
   }
 
   void _showLoginDialog() {
@@ -290,43 +297,94 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
   }
 
   Future<void> createSendPlace() {
-    placeInSend.name = nameController.text;
+    Provider.of<Places>(context, listen: false).placeInSend.name =
+        nameController.text;
 
-    placeInSend.about = aboutController.text;
+    Provider.of<Places>(context, listen: false).placeInSend.about =
+        aboutController.text;
 
-    placeInSend.excerpt = expertController.text;
+    Provider.of<Places>(context, listen: false).placeInSend.excerpt =
+        expertController.text;
 
-    placeInSend.timings_excerpt = timingExpertController.text;
+    Provider.of<Places>(context, listen: false).placeInSend.timings_excerpt =
+        timingExpertController.text;
 
-    placeInSend.price = int.parse(priceController.text);
+    Provider.of<Places>(context, listen: false).placeInSend.price =
+        int.parse(priceController.text);
 
-    placeInSend.phone = phoneController.text;
+    Provider.of<Places>(context, listen: false).placeInSend.phone =
+        phoneController.text;
 
-    placeInSend.mobile = mobileController.text;
+    Provider.of<Places>(context, listen: false).placeInSend.mobile =
+        mobileController.text;
 
-    placeInSend.province = provinceId;
+    Provider.of<Places>(context, listen: false).placeInSend.province =
+        provinceId;
 
-    placeInSend.city = cityId;
+    Provider.of<Places>(context, listen: false).placeInSend.city = cityId;
 
-    placeInSend.region = regionId;
+    Provider.of<Places>(context, listen: false).placeInSend.region = regionId;
 
-    print('placeInSend.region.toString()');
-    print(placeInSend.region.toString());
-    print(placeInSend.city.toString());
-    print(placeInSend.province.toString());
+    Provider.of<Places>(context, listen: false).placeInSend.fields =
+        getIdList(placeFieldsList);
 
-    placeInSend.fields = getIdList(placeFieldsList);
+    Provider.of<Places>(context, listen: false).placeInSend.facilities =
+        getIdList(placeFacilitiesList);
 
-    placeInSend.facilities = getIdList(placeFacilitiesList);
+    Provider.of<Places>(context, listen: false).placeInSend.gallery =
+        getIdList(placeGallery);
 
-    print(placeInSend.fields.toString());
-    print(placeInSend.facilities.toString());
+    print('galllllllllery' +
+        Provider.of<Places>(context, listen: false)
+            .placeInSend
+            .gallery
+            .toString());
+
+    Provider.of<Places>(context, listen: false).placeInSend.timings = [
+      Timing(
+        id: 0,
+        date_start: DateTime(2020, 1, 4, 10, 0, 0, 0, 0).toString(),
+        date_end: DateTime(2020, 1, 4, 10, 0, 0, 0, 0)
+            .add(Duration(hours: 10))
+            .toString(),
+        gender: 'male',
+        reservable: 1,
+        discount: 20,
+      ),
+      Timing(
+        id: 0,
+        date_start: DateTime(2020, 1, 5, 10, 0, 0, 0, 0).toString(),
+        date_end: DateTime(2020, 1, 5, 10, 0, 0, 0, 0)
+            .add(Duration(hours: 2))
+            .toString(),
+        gender: 'male',
+        reservable: 1,
+        discount: 20,
+      ),
+      Timing(
+        id: 0,
+        date_start: DateTime(
+          2020,
+          1,
+          7,
+          10,
+        ).toString(),
+        date_end: DateTime(2020, 1, 7, 10).add(Duration(hours: 2)).toString(),
+        gender: 'male',
+        reservable: 0,
+        discount: 20,
+      )
+    ];
   }
 
   Future<void> retrieveProvince() async {
     setState(() {
       _isLoading = true;
     });
+
+    provinceList.clear();
+
+    provinceValueList.clear();
 
     await Provider.of<Cities>(context, listen: false).retrieveProvince();
 
@@ -398,6 +456,10 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
       _isLoading = true;
     });
 
+    fieldList.clear();
+
+    fieldValueList.clear();
+
     await Provider.of<Places>(context, listen: false).retrieveFields();
 
     fieldList = Provider.of<Places>(context, listen: false).itemsFields;
@@ -415,6 +477,10 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
     setState(() {
       _isLoading = true;
     });
+
+    facilityList.clear();
+
+    facilityValueList.clear();
 
     await Provider.of<Places>(context, listen: false).retrieveFacilities();
 
@@ -439,7 +505,10 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
 
     var currencyFormat = intl.NumberFormat.decimalPattern();
 
+
     bool isLogin = Provider.of<Auth>(context, listen: false).isAuth;
+
+    loadedPlace = Provider.of<Places>(context,).itemPlace;
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
@@ -458,7 +527,8 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
         backgroundColor: AppTheme.appBarColor,
         iconTheme: new IconThemeData(color: AppTheme.appBarIconColor),
       ),
-      body: Container(
+      body:
+      Container(
         color: AppTheme.white,
         child: Stack(
           children: <Widget>[
@@ -626,7 +696,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                         color: AppTheme.white,
                                         borderRadius: BorderRadius.circular(5),
                                         border: Border.all(
-                                          color: Colors.grey,
+                                          color: Colors.green,
                                         )),
                                     child: DropdownButton<String>(
                                       value: provinceValue,
@@ -712,7 +782,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                       color: AppTheme.white,
                                       borderRadius: BorderRadius.circular(5),
                                       border: Border.all(
-                                        color: Colors.grey,
+                                        color: Colors.green,
                                       )),
                                   child: DropdownButton<String>(
                                     value: citiesValue,
@@ -795,7 +865,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                         color: AppTheme.white,
                                         borderRadius: BorderRadius.circular(5),
                                         border: Border.all(
-                                          color: Colors.grey,
+                                          color: Colors.green,
                                         )),
                                     child: DropdownButton<String>(
                                       value: regionValue,
@@ -874,13 +944,18 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                 padding: const EdgeInsets.only(
                                   top: 6,
                                 ),
-                                child: Text(
-                                  'رشته ها',
-                                  style: TextStyle(
-                                    fontFamily: 'Iransans',
-                                    color: AppTheme.grey,
-                                    fontSize: textScaleFactor * 14.0,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'رشته ها',
+                                      style: TextStyle(
+                                        fontFamily: 'Iransans',
+                                        color: AppTheme.grey,
+                                        fontSize: textScaleFactor * 14.0,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                  ],
                                 ),
                               ),
                               Container(
@@ -893,7 +968,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                         color: AppTheme.white,
                                         borderRadius: BorderRadius.circular(5),
                                         border: Border.all(
-                                          color: Colors.grey,
+                                          color: Colors.green,
                                         )),
                                     child: DropdownButton<String>(
                                       value: fieldValue,
@@ -916,6 +991,18 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                       underline: Container(
                                         color: AppTheme.white,
                                       ),
+                                      hint: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          'امکانات مورد نظر خود راانتخاب کنید',
+                                          textAlign: TextAlign.start,
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Iransans',
+                                            fontSize: textScaleFactor * 13.0,
+                                          ),
+                                        ),
+                                      ),
                                       items: fieldValueList
                                           .map<DropdownMenuItem<String>>(
                                               (String value) {
@@ -925,7 +1012,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                             width: deviceWidth * 0.6,
                                             child: Text(
                                               value,
-                                              textAlign: TextAlign.end,
+                                              textAlign: TextAlign.start,
                                               style: TextStyle(
                                                 color: Colors.black,
                                                 fontFamily: 'Iransans',
@@ -941,7 +1028,8 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(6.0),
+                                padding:
+                                    const EdgeInsets.only(top: 6.0, bottom: 6),
                                 child: Wrap(
                                   crossAxisAlignment: WrapCrossAlignment.center,
                                   alignment: WrapAlignment.center,
@@ -996,13 +1084,18 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                 padding: const EdgeInsets.only(
                                   top: 6,
                                 ),
-                                child: Text(
-                                  'امکانات',
-                                  style: TextStyle(
-                                    fontFamily: 'Iransans',
-                                    color: AppTheme.grey,
-                                    fontSize: textScaleFactor * 14.0,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      'امکانات',
+                                      style: TextStyle(
+                                        fontFamily: 'Iransans',
+                                        color: AppTheme.grey,
+                                        fontSize: textScaleFactor * 14.0,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                  ],
                                 ),
                               ),
                               Container(
@@ -1015,7 +1108,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                         color: AppTheme.white,
                                         borderRadius: BorderRadius.circular(5),
                                         border: Border.all(
-                                          color: Colors.grey,
+                                          color: Colors.green,
                                         )),
                                     child: DropdownButton<String>(
                                       value: facilityValue,
@@ -1035,6 +1128,15 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                                   .indexOf(newValue)]);
                                         });
                                       },
+                                      hint: Text(
+                                        'رشته های مورد نظر خود راانتخاب کنید',
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontFamily: 'Iransans',
+                                          fontSize: textScaleFactor * 13.0,
+                                        ),
+                                      ),
                                       underline: Container(
                                         color: AppTheme.white,
                                       ),
@@ -1063,7 +1165,8 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(6.0),
+                                padding:
+                                    const EdgeInsets.only(top: 6.0, bottom: 6),
                                 child: Wrap(
                                   crossAxisAlignment: WrapCrossAlignment.center,
                                   alignment: WrapAlignment.center,
@@ -1117,48 +1220,82 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
-                              InkWell(
-                                onTap: () {
-                                  Navigator.pushNamed(context,
-                                      PlaceGalleryEditScreen.routeName, arguments: {
-                                        'place': loadedPlace,
-                                      } );
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 6,
-                                  ),
-                                  child: Text(
-                                    'گالری',
-                                    style: TextStyle(
-                                      fontFamily: 'Iransans',
-                                      color: AppTheme.grey,
-                                      fontSize: textScaleFactor * 14.0,
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 6,
+                                    ),
+                                    child: Text(
+                                      'گالری',
+                                      style: TextStyle(
+                                        fontFamily: 'Iransans',
+                                        color: AppTheme.grey,
+                                        fontSize: textScaleFactor * 14.0,
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  Spacer(),
+                                  InkWell(
+                                    onTap: () async {
+                                      await createSendPlace();
+                                      int placeId =
+                                          await sendChange();
+                                      Navigator.pushNamed(context,
+                                          PlaceGalleryEditScreen.routeName,
+                                          arguments: {
+                                            'placeId': placeId,
+                                            'place': loadedPlace,
+                                          });
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 6,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'ویرایش گالری',
+                                            style: TextStyle(
+                                              fontFamily: 'Iransans',
+                                              color: AppTheme.iconColor,
+                                              fontSize: textScaleFactor * 14.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                               Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: Wrap(
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  alignment: WrapAlignment.center,
-                                  children: loadedPlace.gallery
-                                      .map(
-                                        (e) => ChangeNotifierProvider.value(
-                                            value: e,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Image.network(
-                                                e.url.medium,
-                                                height: 60,
-                                                width: 100,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            )),
-                                      )
-                                      .toList(),
+                                padding:
+                                    const EdgeInsets.only(top: 6.0, bottom: 6),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey)),
+                                  width: double.infinity,
+                                  child: Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    alignment: WrapAlignment.center,
+                                    children: loadedPlace.gallery
+                                        .map(
+                                          (e) => ChangeNotifierProvider.value(
+                                              value: e,
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Image.network(
+                                                  e.url.medium,
+                                                  height: 60,
+                                                  width: 100,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )),
+                                        )
+                                        .toList(),
+                                  ),
                                 ),
                               ),
                             ],
@@ -1178,33 +1315,53 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
-                              InkWell(
-                                onTap: () async {
-                                  await showDialog<String>(
-                                      context: context,
-                                      builder: (ctx) => LocationPickDialog(
-                                            place: loadedPlace,
-                                          ));
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 6,
-                                  ),
-                                  child: Text(
-                                    'مکان بر روی نقشه',
-                                    style: TextStyle(
-                                      fontFamily: 'Iransans',
-                                      color: AppTheme.grey,
-                                      fontSize: textScaleFactor * 14.0,
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 6,
+                                    ),
+                                    child: Text(
+                                      'مکان بر روی نقشه',
+                                      style: TextStyle(
+                                        fontFamily: 'Iransans',
+                                        color: AppTheme.grey,
+                                        fontSize: textScaleFactor * 14.0,
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  Spacer(),
+                                  InkWell(
+                                    onTap: () async {
+                                      await showDialog<String>(
+                                          context: context,
+                                          builder: (ctx) => LocationPickDialog(
+                                                place: loadedPlace,
+                                              ));
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 6,
+                                      ),
+                                      child: Text(
+                                        'ویرایش موقعیت',
+                                        style: TextStyle(
+                                          fontFamily: 'Iransans',
+                                          color: AppTheme.iconColor,
+                                          fontSize: textScaleFactor * 14.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Container(
-                                height: 300,
-                                width: double.infinity,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(6.0),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6.0),
+                                child: Container(
+                                  height: 300,
+                                  width: double.infinity,
+                                  decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.grey)),
                                   child: loadedPlace.latitude != 0 &&
                                           loadedPlace.longitude != 0
                                       ? PlaceLocationWidget(
@@ -1227,6 +1384,9 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                           ),
                         ),
                       ),
+                      SizedBox(
+                        height: 50,
+                      ),
                     ],
                   ),
                 ),
@@ -1246,19 +1406,30 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                     },
                   )
                 : Container(),
+            Positioned(
+              right: 20,
+              left: 20,
+              bottom: 20,
+              height: 60,
+              child: RaisedButton(
+                color: AppTheme.buttonColor,
+                onPressed: () async {
+                  await createSendPlace();
+
+                  await sendChange();
+                },
+                child: Text(
+                  'تایید اطلاعات',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Iransans',
+                    color: AppTheme.white,
+                    fontSize: textScaleFactor * 14.0,
+                  ),
+                ),
+              ),
+            ),
           ],
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await createSendPlace();
-          await sendChange(placeInSend);
-        },
-        backgroundColor: AppTheme.buttonColor,
-        child: Icon(
-          Icons.check,
-          color: AppTheme.white,
         ),
       ),
       endDrawer: Theme(

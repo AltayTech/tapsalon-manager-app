@@ -37,7 +37,7 @@ dependencies:
 
 dev_dependencies:
   flutter_launcher_icons: ^0.7.5
-  build_web_compilers: ^2.11.0
+#  build_web_compilers: ^2.11.0
 
   flutter_test:
     sdk: flutter
@@ -76,6 +76,10 @@ flutter:
     - assets/images/ent_placeholder.jpg
     - assets/images/create_place_header_image.png
     - assets/images/picker_marker_ic.png
+    - assets/images/main_page_like_ic.png
+    - assets/images/main_page_visit_ic.png
+    - assets/images/main_page_comment_ic.png
+    - assets/images/main_page_place_ic.png
 
   fonts:
 

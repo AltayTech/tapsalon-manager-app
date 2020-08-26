@@ -20,7 +20,7 @@ class Urls {
 
   static const userLikesEndPoint = '/api/user/likes';
   static const likePlaceEndPoint = '/api/likes';
-  static const versionCode = '3';
+  static const versionCode = '4';
   static const requestHeader = {
     'Content-Type': 'application/json',
     'Accept': 'application/json',

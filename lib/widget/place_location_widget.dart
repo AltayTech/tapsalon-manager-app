@@ -23,10 +23,13 @@ class PlaceLocationWidget extends StatefulWidget {
 class _PlaceLocationWidgetState extends State<PlaceLocationWidget>
     with TickerProviderStateMixin {
   bool _isInit = true;
+
   var _isLoading = false;
 
   Completer<GoogleMapController> _controller = Completer();
+
   GoogleMapController myController;
+
   static const LatLng _center = const LatLng(38.074065, 46.312711);
 
   final Set<Marker> _markers = {};
@@ -37,16 +40,13 @@ class _PlaceLocationWidgetState extends State<PlaceLocationWidget>
 
   double speed;
 
-  BitmapDescriptor salonBitmapDescriptor = BitmapDescriptor.defaultMarker;
-  BitmapDescriptor gymBitmapDescriptor = BitmapDescriptor.defaultMarker;
-  BitmapDescriptor entBitmapDescriptor = BitmapDescriptor.defaultMarker;
-
   Place selectedPlace;
 
   @override
   void didChangeDependencies() {
     if (_isInit) {
       searchItem();
+
       _lastMapPosition =
           LatLng(selectedPlace.latitude, selectedPlace.longitude);
     }
@@ -55,11 +55,19 @@ class _PlaceLocationWidgetState extends State<PlaceLocationWidget>
   }
 
   Future<void> searchItem() async {
+    setState(() {
+      _isLoading = true;
+    });
+
     selectedPlace = widget.place;
 
     await setCustomMapPin();
 
     _onAddMarker(selectedPlace);
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _onAddMarker(Place place) async {
@@ -121,7 +129,7 @@ class _PlaceLocationWidgetState extends State<PlaceLocationWidget>
   BitmapDescriptor pinLocationIconEnt;
   BitmapDescriptor pinLocationIconGym;
 
-  void setCustomMapPin() async {
+  Future<void> setCustomMapPin() async {
     print('setCustomMapPin');
 
     pinLocationIconSalon = await BitmapDescriptor.fromAssetImage(
@@ -169,60 +177,47 @@ class _PlaceLocationWidgetState extends State<PlaceLocationWidget>
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
     return Directionality(
       textDirection: TextDirection.rtl,
-      child: _isLoading
-          ? SpinKitFadingCircle(
-              itemBuilder: (BuildContext context, int index) {
-                return DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: index.isEven
-                        ? AppTheme.spinerColor
-                        : AppTheme.spinerColor,
-                  ),
-                );
-              },
-            )
-          : Stack(
-              children: <Widget>[
-                GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: _lastMapPosition,
-                    zoom: 11.0,
-                  ),
-                  mapType: _currentMapType,
-                  markers: _markers,
-                  onCameraMove: _onCameraMove,
-                  myLocationEnabled: true,
-                  compassEnabled: true,
-                  mapToolbarEnabled: true,
-                  myLocationButtonEnabled: true,
-                ),
-                Positioned(
-                  top: 0,
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: _isLoading
-                        ? SpinKitFadingCircle(
-                            itemBuilder: (BuildContext context, int index) {
-                              return DecoratedBox(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: index.isEven
-                                      ? AppTheme.spinerColor
-                                      : AppTheme.spinerColor,
-                                ),
-                              );
-                            },
-                          )
-                        : Container(),
-                  ),
-                ),
-              ],
+      child: Stack(
+        children: <Widget>[
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _lastMapPosition,
+              zoom: 14.0,
             ),
+            mapType: _currentMapType,
+            markers: _markers,
+            onCameraMove: _onCameraMove,
+            myLocationEnabled: true,
+            compassEnabled: true,
+            mapToolbarEnabled: true,
+            myLocationButtonEnabled: true,
+          ),
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Align(
+              alignment: Alignment.center,
+              child: _isLoading
+                  ? SpinKitFadingCircle(
+                      itemBuilder: (BuildContext context, int index) {
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index.isEven
+                                ? AppTheme.spinerColor
+                                : AppTheme.spinerColor,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

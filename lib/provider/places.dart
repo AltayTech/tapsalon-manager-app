@@ -14,6 +14,7 @@ import 'package:tapsalon_manager/models/places_models/main_places.dart';
 import 'package:tapsalon_manager/models/places_models/place.dart';
 import 'package:tapsalon_manager/models/places_models/place_in_search.dart';
 import 'package:tapsalon_manager/models/places_models/place_in_send.dart';
+import 'package:tapsalon_manager/models/timing.dart';
 
 import '../models/comment.dart';
 import '../models/facility.dart';
@@ -33,11 +34,11 @@ class Places with ChangeNotifier {
 
   String _token;
 
-  double latitude;
-
-  double longitude;
+  PlaceInSend placeInSend;
 
   List<Comment> _itemsComments = [];
+
+  List<List<Timing>> timingListTable = [[]];
 
   ImageObj _placeDefaultImage = ImageObj(
       id: 0,
@@ -101,8 +102,6 @@ class Places with ChangeNotifier {
   Place _itemPlace;
 
   SearchDetails _commentsSearchDetails;
-
-  bool isLiked;
 
   Map<String, String> searchBody = {};
 
@@ -428,6 +427,8 @@ class Places with ChangeNotifier {
             name: placeName,
             province: provinceId,
             city: cityId,
+            status: 2,
+
           ),
         ),
       );
@@ -453,7 +454,7 @@ class Places with ChangeNotifier {
     }
   }
 
-  Future<int> modifyPlace(PlaceInSend placeInSend) async {
+  Future<int> modifyPlace() async {
     print('modifyPlace');
 
     final url = Urls.rootUrl + Urls.userPlacesEndPoint + '/${placeInSend.id}';
@@ -477,27 +478,40 @@ class Places with ChangeNotifier {
           placeInSend,
         ),
       );
+
       print(response.statusCode);
+
       print(response.body);
+
       print('response.body');
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
+        print('response.body2');
+
         final extractedData = json.decode(response.body);
+
         print(extractedData.toString());
-        PlaceInSend mainPlaces = PlaceInSend.fromJson(extractedData);
+
+        PlaceInSend placeInSendEditied = PlaceInSend.fromJson(extractedData);
+
         print(response.headers.toString());
+
+        placeInSend.id=placeInSendEditied.id;
         notifyListeners();
+
         print('ccccccnnn send');
 
-        return mainPlaces.id;
+        return placeInSendEditied.id;
       } else {
         notifyListeners();
+
         print('ccccccnnnooot send');
 
         return 0;
       }
     } catch (error) {
       print(error.toString());
+
       throw (error);
     }
   }
@@ -696,6 +710,7 @@ class Places with ChangeNotifier {
     print('Upload');
 
     var stream = new ByteStream(DelegatingStream(imageFile.openRead()));
+
     var length = await imageFile.length();
 
     final url = Uri.parse(Urls.rootUrl + Urls.imageUploadEndPoint);
@@ -704,41 +719,42 @@ class Places with ChangeNotifier {
       "POST",
       url,
     );
+
     final prefs = await SharedPreferences.getInstance();
 
     var _token = prefs.getString('token');
-    print(placeId.toString());
-    print(_token.toString());
 
     Map<String, String> header1 = {
       'Authorization': 'Bearer $_token',
       'Content-Type': 'multipart/form-data',
       'Accept': 'application/json',
+      'version': Urls.versionCode
     };
+
     Map<String, String> fields = {
       'place_id': '$placeId',
     };
+
     request.headers.addAll(header1);
+
     request.fields.addAll(fields);
-    var multipartFile = MultipartFile('photo', stream, length,
+
+    var multipartFile = MultipartFile('images[]', stream, length,
         filename: basename(imageFile.path));
 
     request.files.add(multipartFile);
-    var response = await request.send();
-    print('boooddddyyyyy' + response.toString());
-    print(response.reasonPhrase);
-    print(response.statusCode);
-    print('Upload یخدثثثثثثثثثثثثثثثثث');
 
-//    response.stream.transform(utf8.decoder).listen((value) {
-//      print(value);
-//    });
+    var response = await request.send();
+
+    response.stream.transform(utf8.decoder).listen((value) {
+      print(value);
+    });
   }
 
   Future<void> deleteImage(int imageId) async {
     print('deleteImage');
+
     final url = Urls.rootUrl + Urls.imageUploadEndPoint + '/$imageId';
-    print(url);
 
     final prefs = await SharedPreferences.getInstance();
 
@@ -752,6 +768,7 @@ class Places with ChangeNotifier {
           'Authorization': 'Bearer $_token',
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'version': Urls.versionCode
         },
       );
       print(response.body);

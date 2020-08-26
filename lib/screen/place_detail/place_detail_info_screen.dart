@@ -5,7 +5,6 @@ import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
 import 'package:tapsalon_manager/models/image.dart';
 import 'package:tapsalon_manager/models/places_models/place.dart';
-import 'package:tapsalon_manager/provider/auth.dart';
 import 'package:tapsalon_manager/widget/dialogs/custom_dialog_show_picture.dart';
 import 'package:tapsalon_manager/widget/en_to_ar_number_convertor.dart';
 import 'package:tapsalon_manager/widget/items/text_info_item.dart';
@@ -13,13 +12,10 @@ import 'package:tapsalon_manager/widget/place_location_widget.dart';
 
 import '../../provider/app_theme.dart';
 import '../../provider/places.dart';
+import 'place_detail_info_edit_screen.dart';
 
 class PlaceDetailInfoScreen extends StatefulWidget {
   static const routeName = '/PlaceDetailScreen';
-
-  final Place loadedPlace;
-
-  PlaceDetailInfoScreen(this.loadedPlace);
 
   @override
   _PlaceDetailInfoScreenState createState() => _PlaceDetailInfoScreenState();
@@ -35,26 +31,25 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
 
   List<ImageObj> gallery = [];
 
+  Place loadedPlace;
+
+  ImageObj placeDefaultImage;
+
+  ImageObj gymDefaultImage;
+
+  ImageObj entDefaultImage;
+
   @override
   void didChangeDependencies() async {
     if (_isInit) {
-      ImageObj placeDefaultImage =
+      placeDefaultImage =
           Provider.of<Places>(context, listen: false).placeDefaultImage;
-      var gymDefaultImage =
-          Provider.of<Places>(context, listen: false).gymDefaultImage;
-      var entDefaultImage =
-          Provider.of<Places>(context, listen: false).entDefaultImage;
 
-      if (widget.loadedPlace.gallery.length < 1) {
-        gallery.clear();
-        gallery.add(widget.loadedPlace.placeType.id == 2
-            ? gymDefaultImage
-            : widget.loadedPlace.placeType.id == 4
-                ? entDefaultImage
-                : placeDefaultImage);
-      } else {
-        gallery = widget.loadedPlace.gallery;
-      }
+      gymDefaultImage =
+          Provider.of<Places>(context, listen: false).gymDefaultImage;
+
+      entDefaultImage =
+          Provider.of<Places>(context, listen: false).entDefaultImage;
 
       setState(() {});
     }
@@ -65,18 +60,35 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
   void _showImageDialog() {
     showDialog(
         context: context,
-        builder: (ctx) => CustomDialogShowPicture(
-              image: gallery[_current],
-            ));
+        builder: (ctx) => CustomDialogShowPicture(image: gallery[_current]));
+  }
+
+  Future<void> getGallery() {
+    if (loadedPlace.gallery.length < 1) {
+      gallery.clear();
+      gallery.add(loadedPlace.placeType.id == 2
+          ? gymDefaultImage
+          : loadedPlace.placeType.id == 4
+              ? entDefaultImage
+              : placeDefaultImage);
+    } else {
+      gallery = loadedPlace.gallery;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
+
     double deviceWidth = MediaQuery.of(context).size.width;
+
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
+
     var currencyFormat = intl.NumberFormat.decimalPattern();
-    bool isLogin = Provider.of<Auth>(context, listen: false).isAuth;
+
+    loadedPlace = Provider.of<Places>(context).itemPlace;
+
+    getGallery();
 
     return Container(
       color: AppTheme.white,
@@ -110,81 +122,71 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                               height: deviceWidth * 0.6,
                               child: Stack(
                                 children: <Widget>[
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        border: Border.all(
-                                            width: 5, color: AppTheme.bg),
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: CarouselSlider(
-                                      options: CarouselOptions(
-                                        viewportFraction: 1.0,
-                                        initialPage: 0,
-                                        enableInfiniteScroll: true,
-                                        reverse: false,
-                                        autoPlay:
-                                            gallery.length == 1 ? true : false,
-                                        height: double.infinity,
-                                        autoPlayInterval: Duration(seconds: 5),
-                                        autoPlayAnimationDuration:
-                                            Duration(milliseconds: 800),
-                                        enlargeCenterPage: true,
-                                        scrollDirection: Axis.horizontal,
-                                        onPageChanged: (index, _) {
-                                          _current = index;
-                                          setState(() {});
-                                        },
-                                        autoPlayCurve: Curves.fastOutSlowIn,
-                                      ),
-                                      items: gallery.map((gallery) {
-                                        return Builder(
-                                          builder: (BuildContext context) {
-                                            return Container(
-                                              width: deviceWidth,
-                                              child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                                child: gallery.url.large
-                                                        .startsWith(
-                                                            'assets/images')
-                                                    ? Image.asset(
-                                                        gallery.url.medium,
-                                                        fit: BoxFit.cover,
-                                                      )
-                                                    : Image.network(
-                                                        gallery.url.medium,
-                                                        fit: BoxFit.cover,
-                                                        loadingBuilder:
-                                                            (BuildContext
-                                                                    context,
-                                                                Widget child,
-                                                                ImageChunkEvent
-                                                                    loadingProgress) {
-                                                          if (loadingProgress ==
-                                                              null)
-                                                            return child;
-                                                          return Center(
-                                                            child:
-                                                                CircularProgressIndicator(
-                                                              value: loadingProgress
-                                                                          .expectedTotalBytes !=
-                                                                      null
-                                                                  ? loadingProgress
-                                                                          .cumulativeBytesLoaded /
-                                                                      loadingProgress
-                                                                          .expectedTotalBytes
-                                                                  : null,
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      }).toList(),
+                                  CarouselSlider(
+                                    options: CarouselOptions(
+                                      viewportFraction: 1.0,
+                                      initialPage: 0,
+                                      enableInfiniteScroll: true,
+                                      reverse: false,
+                                      autoPlay:
+                                          gallery.length == 1 ? true : false,
+                                      height: double.infinity,
+                                      autoPlayInterval: Duration(seconds: 5),
+                                      autoPlayAnimationDuration:
+                                          Duration(milliseconds: 800),
+                                      enlargeCenterPage: true,
+                                      scrollDirection: Axis.horizontal,
+                                      onPageChanged: (index, _) {
+                                        _current = index;
+                                        setState(() {});
+                                      },
+                                      autoPlayCurve: Curves.fastOutSlowIn,
                                     ),
+                                    items: gallery.map((gallery) {
+                                      return Builder(
+                                        builder: (BuildContext context) {
+                                          return Container(
+                                            width: deviceWidth,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: gallery.url.large
+                                                      .startsWith(
+                                                          'assets/images')
+                                                  ? Image.asset(
+                                                      gallery.url.medium,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.network(
+                                                      gallery.url.medium,
+                                                      fit: BoxFit.cover,
+                                                      loadingBuilder: (BuildContext
+                                                              context,
+                                                          Widget child,
+                                                          ImageChunkEvent
+                                                              loadingProgress) {
+                                                        if (loadingProgress ==
+                                                            null) return child;
+                                                        return Center(
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            value: loadingProgress
+                                                                        .expectedTotalBytes !=
+                                                                    null
+                                                                ? loadingProgress
+                                                                        .cumulativeBytesLoaded /
+                                                                    loadingProgress
+                                                                        .expectedTotalBytes
+                                                                : null,
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    }).toList(),
                                   ),
                                   Positioned(
                                     bottom: 0,
@@ -222,46 +224,49 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                               ),
                             ),
                           ),
+                          Padding(
+                            padding: EdgeInsets.only(top: 10),
+                          ),
                           TextInfoItem(
                             title: 'نام مکان',
-                            content: widget.loadedPlace.name,
+                            content: loadedPlace.name,
                           ),
                           TextInfoItem(
                             title: 'درباره',
-                            content: widget.loadedPlace.about,
+                            content: loadedPlace.about,
                           ),
                           TextInfoItem(
                             title: 'هزینه (تومان)',
                             content: EnArConvertor()
                                 .replaceArNumber(currencyFormat
                                     .format(double.parse(
-                                        widget.loadedPlace.price.toString()))
+                                        loadedPlace.price.toString()))
                                     .toString())
                                 .toString(),
                           ),
                           TextInfoItem(
                             title: 'آدرس',
-                            content: widget.loadedPlace.address,
+                            content: loadedPlace.address,
                           ),
                           TextInfoItem(
                             title: 'استان',
-                            content: widget.loadedPlace.province.name,
+                            content: loadedPlace.province.name,
                           ),
                           TextInfoItem(
                             title: 'شهر',
-                            content: widget.loadedPlace.city.name,
+                            content: loadedPlace.city.name,
                           ),
                           TextInfoItem(
                             title: 'منطقه',
-                            content: widget.loadedPlace.region.name,
+                            content: loadedPlace.region.name,
                           ),
                           TextInfoItem(
                             title: 'تلفن',
-                            content: widget.loadedPlace.phone,
+                            content: loadedPlace.phone,
                           ),
                           TextInfoItem(
                             title: 'موبایل',
-                            content: widget.loadedPlace.mobile,
+                            content: loadedPlace.mobile,
                           ),
                           Padding(
                             padding: const EdgeInsets.only(bottom: 8, top: 8),
@@ -273,37 +278,41 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                                       width: 2, color: AppTheme.white),
                                   borderRadius: BorderRadius.circular(10)),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
                                     padding: const EdgeInsets.only(
                                       top: 6,
                                     ),
-                                    child: Text(
-                                      'رشته ها',
-                                      style: TextStyle(
-                                        fontFamily: 'Iransans',
-                                        color: AppTheme.grey,
-                                        fontSize: textScaleFactor * 14.0,
-                                      ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'رشته ها',
+                                          style: TextStyle(
+                                            fontFamily: 'Iransans',
+                                            color: AppTheme.grey,
+                                            fontSize: textScaleFactor * 14.0,
+                                          ),
+                                        ),
+                                        Spacer()
+                                      ],
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.all(6.0),
+                                    padding: const EdgeInsets.only(
+                                        top: 6.0, bottom: 6),
                                     child: Wrap(
                                       crossAxisAlignment:
                                           WrapCrossAlignment.center,
                                       alignment: WrapAlignment.center,
-                                      children: widget.loadedPlace.fields
+                                      children: loadedPlace.fields
                                           .map((e) =>
                                               ChangeNotifierProvider.value(
                                                 value: e,
                                                 child: Text(
-                                                  widget.loadedPlace.fields
+                                                  loadedPlace.fields
                                                               .indexOf(e) <
-                                                          (widget
-                                                                  .loadedPlace
-                                                                  .fields
+                                                          (loadedPlace.fields
                                                                   .length -
                                                               1)
                                                       ? (e.name + '، ')
@@ -336,36 +345,41 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                                       width: 2, color: AppTheme.white),
                                   borderRadius: BorderRadius.circular(10)),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
                                     padding: const EdgeInsets.only(
                                       top: 6,
                                     ),
-                                    child: Text(
-                                      'امکانات',
-                                      style: TextStyle(
-                                        fontFamily: 'Iransans',
-                                        color: AppTheme.grey,
-                                        fontSize: textScaleFactor * 14.0,
-                                      ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'امکانات',
+                                          style: TextStyle(
+                                            fontFamily: 'Iransans',
+                                            color: AppTheme.grey,
+                                            fontSize: textScaleFactor * 14.0,
+                                          ),
+                                        ),
+                                        Spacer()
+                                      ],
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.all(6.0),
+                                    padding: const EdgeInsets.only(
+                                        top: 6.0, bottom: 6),
                                     child: Wrap(
                                       crossAxisAlignment:
                                           WrapCrossAlignment.center,
-                                      alignment: WrapAlignment.center,
-                                      children: widget.loadedPlace.facilities
+                                      alignment: WrapAlignment.start,
+                                      children: loadedPlace.facilities
                                           .map((e) =>
                                               ChangeNotifierProvider.value(
                                                 value: e,
                                                 child: Text(
-                                                  widget.loadedPlace.facilities
+                                                  loadedPlace.facilities
                                                               .indexOf(e) <
-                                                          (widget
-                                                                  .loadedPlace
+                                                          (loadedPlace
                                                                   .facilities
                                                                   .length -
                                                               1)
@@ -398,43 +412,54 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                                       width: 2, color: AppTheme.white),
                                   borderRadius: BorderRadius.circular(10)),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
                                     padding: const EdgeInsets.only(
                                       top: 6,
                                     ),
-                                    child: Text(
-                                      'گالری',
-                                      style: TextStyle(
-                                        fontFamily: 'Iransans',
-                                        color: AppTheme.grey,
-                                        fontSize: textScaleFactor * 14.0,
-                                      ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'گالری',
+                                          style: TextStyle(
+                                            fontFamily: 'Iransans',
+                                            color: AppTheme.grey,
+                                            fontSize: textScaleFactor * 14.0,
+                                          ),
+                                        ),
+                                        Spacer()
+                                      ],
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(6.0),
-                                    child: Wrap(
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      alignment: WrapAlignment.center,
-                                      children: widget.loadedPlace.gallery
-                                          .map((e) =>
-                                              ChangeNotifierProvider.value(
-                                                  value: e,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Image.network(
-                                                      e.url.medium,
-                                                      height: 60,
-                                                      width: 100,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  )))
-                                          .toList(),
+                                  Container(
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey)),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 6.0, bottom: 6),
+                                      child: Wrap(
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        alignment: WrapAlignment.start,
+                                        children: loadedPlace.gallery
+                                            .map((e) =>
+                                                ChangeNotifierProvider.value(
+                                                    value: e,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Image.network(
+                                                        e.url.medium,
+                                                        height: 80,
+                                                        width: 120,
+                                                        fit: BoxFit.cover,
+                                                      ),
+                                                    )))
+                                            .toList(),
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -458,24 +483,31 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                                     padding: const EdgeInsets.only(
                                       top: 6,
                                     ),
-                                    child: Text(
-                                      'مکان بر روی نقشه',
-                                      style: TextStyle(
-                                        fontFamily: 'Iransans',
-                                        color: AppTheme.grey,
-                                        fontSize: textScaleFactor * 14.0,
-                                      ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          'مکان بر روی نقشه',
+                                          style: TextStyle(
+                                            fontFamily: 'Iransans',
+                                            color: AppTheme.grey,
+                                            fontSize: textScaleFactor * 14.0,
+                                          ),
+                                        ),
+                                        Spacer()
+                                      ],
                                     ),
                                   ),
                                   Container(
                                     height: 300,
                                     width: double.infinity,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey)),
                                     child: Padding(
                                       padding: const EdgeInsets.all(6.0),
-                                      child: widget.loadedPlace.latitude != 0 &&
-                                              widget.loadedPlace.longitude != 0
+                                      child: loadedPlace.latitude != 0 &&
+                                              loadedPlace.longitude != 0
                                           ? PlaceLocationWidget(
-                                              place: widget.loadedPlace,
+                                              place: loadedPlace,
                                             )
                                           : Center(
                                               child: Text(
@@ -495,7 +527,35 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                               ),
                             ),
                           ),
+                          SizedBox(
+                            height: 50,
+                          ),
                         ],
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 20,
+                  left: 20,
+                  bottom: 20,
+                  height: 60,
+                  child: RaisedButton(
+                    color: AppTheme.buttonColor,
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(
+                          PlaceDetailInfoEditScreen.routeName,
+                          arguments: {
+                            'place': loadedPlace,
+                          });
+                    },
+                    child: Text(
+                      'ویرایش اطلاعات',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Iransans',
+                        color: AppTheme.white,
+                        fontSize: textScaleFactor * 14.0,
                       ),
                     ),
                   ),

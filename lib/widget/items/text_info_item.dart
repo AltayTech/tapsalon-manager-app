@@ -42,7 +42,7 @@ class TextInfoItem extends StatelessWidget {
               borderRadius: BorderRadius.circular(5),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.only(top:8,bottom: 8),
               child: Text(
                 EnArConvertor().replaceArNumber(content),
                 softWrap: true,

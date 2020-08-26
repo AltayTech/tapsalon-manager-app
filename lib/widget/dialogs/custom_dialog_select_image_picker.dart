@@ -88,7 +88,7 @@ class _CustomDialogSelectImagePickerState
                             height: constraint.maxHeight * 0.08,
                             width: constraint.maxWidth * 0.4,
                             decoration: BoxDecoration(
-                              color: Color(0xffFF6D6B),
+                              color: Colors.blue,
                               borderRadius: BorderRadius.circular(25),
                             ),
                             child: Center(
@@ -132,7 +132,7 @@ class _CustomDialogSelectImagePickerState
                             height: constraint.maxHeight * 0.08,
                             width: constraint.maxWidth * 0.4,
                             decoration: BoxDecoration(
-                              color: Color(0xffFF6D6B),
+                              color: Colors.blue,
                               borderRadius: BorderRadius.circular(25),
                             ),
                             child: Center(

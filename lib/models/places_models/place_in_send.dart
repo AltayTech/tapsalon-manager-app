@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../timing.dart';
 
 class PlaceInSend with ChangeNotifier {
-  final int id;
+  int id;
   String name;
   String excerpt;
   String about;
@@ -23,6 +23,7 @@ class PlaceInSend with ChangeNotifier {
   int province;
   int city;
   int region;
+  int status;
 
   PlaceInSend({
     this.id,
@@ -45,6 +46,7 @@ class PlaceInSend with ChangeNotifier {
     this.province,
     this.city,
     this.region,
+    this.status,
   });
 
   factory PlaceInSend.fromJson(Map<String, dynamic> parsedJson) {
@@ -133,9 +135,9 @@ class PlaceInSend with ChangeNotifier {
 //    Map fields =
 //        this.fields != null ? this.fields.toJson() : null;
 //
-//    List<int> facilities = this.facilities != null
-//        ? this.facilities.map((i) => i.toJson()).toList()
-//        : null;
+    List<Map> timings = this.timings != null
+        ? this.timings.map((i) => i.toJson()).toList()
+        : null;
 
     return {
       'id': id,
@@ -153,11 +155,12 @@ class PlaceInSend with ChangeNotifier {
       'fields_ids': fields,
       'facilities_ids': facilities,
       'image_id': image,
-      'gallery': gallery,
+      'gallery_ids': gallery,
       'timings': timings,
       'ostan_id': province,
       'city_id': city,
       'region_id': region,
+      'status': status,
     };
   }
 }

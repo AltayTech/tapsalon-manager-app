@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tapsalon_manager/screen/navigation_bottom_screen.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_create_screen.dart';
+import 'package:tapsalon_manager/screen/place_detail/place_detail_info_screen.dart';
+import 'package:tapsalon_manager/screen/place_detail/place_detail_screen_test.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../provider/app_theme.dart';
@@ -30,6 +32,7 @@ class MainDrawer extends StatelessWidget {
       onTap: tapHandler,
     );
   }
+
   _launchURL(String url) async {
     if (await canLaunch(url)) {
       await launch(url);
@@ -37,6 +40,7 @@ class MainDrawer extends StatelessWidget {
       throw 'Could not launch $url';
     }
   }
+
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
@@ -143,6 +147,28 @@ class MainDrawer extends StatelessWidget {
                           ),
                           ListTile(
                             title: Text(
+                              'تست',
+                              style: TextStyle(
+                                fontFamily: "Iransans",
+                                fontWeight: FontWeight.w500,
+                                fontSize: textScaleFactor * 15,
+                                color: textColor,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
+                            trailing: Icon(
+                              Icons.home,
+                              color: iconColor,
+                            ),
+                            onTap: () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pushNamed(
+                                PlaceDetailScreenTest.routeName,
+                              );
+                            },
+                          ),
+                          ListTile(
+                            title: Text(
                               'ایجاد مکان های ورزشی',
                               style: TextStyle(
                                 fontFamily: "Iransans",
@@ -160,11 +186,10 @@ class MainDrawer extends StatelessWidget {
                               Navigator.of(context).pop();
 
                               Navigator.of(context).pushNamed(
-                                  PlaceCreateScreen.routeName,
-                             );
+                                PlaceCreateScreen.routeName,
+                              );
                             },
                           ),
-
                           ListTile(
                             title: Text(
                               'معرفی مکان ورزشی',
@@ -183,11 +208,10 @@ class MainDrawer extends StatelessWidget {
                             onTap: () {
                               Navigator.of(context).pop();
 
-                             _launchURL('https://tapsalon.ir/%d8%ab%d8%a8%d8%aa-%d9%85%da%a9%d8%a7%d9%86-%d9%88%d8%b1%d8%b2%d8%b4%db%8c/');
+                              _launchURL(
+                                  'https://tapsalon.ir/%d8%ab%d8%a8%d8%aa-%d9%85%da%a9%d8%a7%d9%86-%d9%88%d8%b1%d8%b2%d8%b4%db%8c/');
                             },
                           ),
-
-
                           ListTile(
                             title: Text(
                               'درباره ما',
@@ -210,7 +234,6 @@ class MainDrawer extends StatelessWidget {
                                   .pushNamed(AboutUsScreen.routeName);
                             },
                           ),
-
                           ListTile(
                             title: Text(
                               'خروج از حساب کاربری',
