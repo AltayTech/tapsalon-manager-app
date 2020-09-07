@@ -7,6 +7,7 @@ import 'package:tapsalon_manager/models/places_models/place_in_send.dart';
 import 'package:tapsalon_manager/models/timing.dart';
 import 'package:tapsalon_manager/widget/dialogs/custom_dialog.dart';
 import 'package:tapsalon_manager/widget/items/WeekDayRow.dart';
+import 'package:tapsalon_manager/widget/items/edit_info_item.dart';
 import 'package:tapsalon_manager/widget/main_drawer.dart';
 
 import '../../provider/app_theme.dart';
@@ -34,6 +35,8 @@ class _PlaceDetailTimingEditScreenState
 
   PlaceInSend placeInSend;
 
+  final timeExplanationController = TextEditingController();
+
   @override
   void didChangeDependencies() async {
     if (_isInit) {
@@ -48,20 +51,31 @@ class _PlaceDetailTimingEditScreenState
       print(timingListTable.length);
 
       await convertToTimingTable();
+
+      timeExplanationController.text = loadedPlace.timings_excerpt;
     }
     _isInit = false;
     super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    timeExplanationController.dispose();
+
+    super.dispose();
   }
 
   Future<void> updateTimingTable() async {
     setState(() {
       _isLoading = true;
     });
+
     await convertFromTimingTable().then((value) {
       Provider.of<Places>(context, listen: false).placeInSend.timings =
           timingList;
     });
-    await sendChange();
+
+//    await sendChange();
 
     setState(() {
       _isLoading = false;
@@ -209,35 +223,50 @@ class _PlaceDetailTimingEditScreenState
                   Directionality(
                     textDirection: TextDirection.rtl,
                     child: SingleChildScrollView(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            color: AppTheme.white,
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          children: <Widget>[
-                            WeekDayRow(
-                              weekDay: 1,
+                      child: Column(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                                color: AppTheme.white,
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              children: <Widget>[
+                                WeekDayRow(
+                                  weekDay: 6,
+                                ),
+                                WeekDayRow(
+                                  weekDay: 7,
+                                ),
+                                WeekDayRow(
+                                  weekDay: 1,
+                                ),
+                                WeekDayRow(
+                                  weekDay: 2,
+                                ),
+                                WeekDayRow(
+                                  weekDay: 3,
+                                ),
+                                WeekDayRow(
+                                  weekDay: 4,
+                                ),
+                                WeekDayRow(
+                                  weekDay: 5,
+                                ),
+                              ],
                             ),
-                            WeekDayRow(
-                              weekDay: 2,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: EditInfoItem(
+                              title: 'توضیحات زمانبندی',
+                              controller: timeExplanationController,
+                              keybordType: TextInputType.text,
                             ),
-                            WeekDayRow(
-                              weekDay: 3,
-                            ),
-                            WeekDayRow(
-                              weekDay: 4,
-                            ),
-                            WeekDayRow(
-                              weekDay: 5,
-                            ),
-                            WeekDayRow(
-                              weekDay: 6,
-                            ),
-                            WeekDayRow(
-                              weekDay: 7,
-                            ),
-                          ],
-                        ),
+                          ),
+                          SizedBox(
+                            height: 80,
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -249,14 +278,13 @@ class _PlaceDetailTimingEditScreenState
                     child: RaisedButton(
                       color: AppTheme.buttonColor,
                       onPressed: () async {
-                        await updateTimingTable();
-                        await sendChange();
+                        Provider.of<Places>(context, listen: false)
+                            .placeInSend
+                            .timings_excerpt = timeExplanationController.text;
 
-//                Navigator.of(context).pushNamed(
-//                    PlaceDetailTimingEditScreen.routeName,
-//                    arguments: {
-//                      'place': loadedPlace,
-//                    });
+                        await updateTimingTable();
+
+                        await sendChange();
                       },
                       child: Text(
                         'تایید تغییرات',

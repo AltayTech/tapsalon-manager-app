@@ -175,7 +175,13 @@ class _TimingTableState extends State<TimingTable> {
   }
 
   double getHeight(String startDate, double rowHeight) {
-    double height = ((DateTime.parse(startDate).weekday - 1) * rowHeight);
+    double height;
+    if(DateTime.parse(startDate).weekday>5){
+      height = ((DateTime.parse(startDate).weekday-6 ) * rowHeight);
+    }else{
+       height = ((DateTime.parse(startDate).weekday+1 ) * rowHeight);
+
+    }
 
     return height;
   }

@@ -46,8 +46,9 @@ class _LocationPickDialogState extends State<LocationPickDialog> {
     if (_isInit) {
       await searchItem();
 
-      _lastMapPosition =
-          LatLng(selectedPlace.latitude, selectedPlace.longitude);
+      if (selectedPlace.latitude == 0 && selectedPlace.longitude == 0)
+        _lastMapPosition =
+            LatLng(selectedPlace.latitude, selectedPlace.longitude);
     }
 
     _isInit = false;

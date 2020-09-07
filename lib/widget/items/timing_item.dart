@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tapsalon_manager/models/timing.dart';
+import 'package:tapsalon_manager/widget/dialogs/custom_dialog_select_discounted.dart';
+import 'package:tapsalon_manager/widget/dialogs/custom_dialog_select_gender.dart';
 
 import '../en_to_ar_number_convertor.dart';
 
@@ -12,6 +14,7 @@ class TimingItem extends StatelessWidget {
     @required this.updateStart,
     @required this.updateEnd,
     @required this.updateGender,
+    @required this.updateDiscount,
   }) : super(key: key);
 
   final Timing timing;
@@ -22,6 +25,7 @@ class TimingItem extends StatelessWidget {
   final Function updateStart;
   final Function updateEnd;
   final Function updateGender;
+  final Function updateDiscount;
 
   DateTime setDataTime(TimeOfDay timeOfDay) {
     DateTime time = DateTime.now();
@@ -40,11 +44,10 @@ class TimingItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        width: 180,
+        width: 280,
         decoration: BoxDecoration(
             color:
                 timing.gender == 'male' ? Colors.blue[100] : Colors.orange[100],
-            border: Border.all(color: Colors.grey),
             borderRadius: BorderRadius.circular(5)),
         child: Padding(
           padding: const EdgeInsets.all(4),
@@ -74,17 +77,30 @@ class TimingItem extends StatelessWidget {
                   });
                 },
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-                  child: Text(
-                    EnArConvertor().replaceArNumber(
-                      '${(DateTime.parse(timing.date_start)).hour}:${(DateTime.parse(timing.date_start)).minute}',
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(
+                        5,
+                      ),
                     ),
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'Iransans',
-                      fontSize: textScaleFactor * 12.0,
+                    child: Center(
+                      child: Text(
+                        EnArConvertor().replaceArNumber(
+                          '${(DateTime.parse(timing.date_start)).hour}:${(DateTime.parse(timing.date_start)).minute}',
+                        ),
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Iransans',
+                          fontSize: textScaleFactor * 12.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
@@ -110,30 +126,110 @@ class TimingItem extends StatelessWidget {
                   });
                 },
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-                  child: Text(
-                    EnArConvertor().replaceArNumber(
-                      '${(DateTime.parse(timing.date_end)).hour}:${(DateTime.parse(timing.date_end)).minute}',
+                  padding: const EdgeInsets.only(
+                    left: 8,
+                  ),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(
+                        5,
+                      ),
                     ),
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'Iransans',
-                      fontSize: textScaleFactor * 12.0,
+                    child: Center(
+                      child: Text(
+                        EnArConvertor().replaceArNumber(
+                          '${(DateTime.parse(timing.date_end)).hour}:${(DateTime.parse(timing.date_end)).minute}',
+                        ),
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Iransans',
+                          fontSize: textScaleFactor * 12.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
-                child: Text(
-                  timing.gender == 'male' ? 'آقایان' : 'خانم ها',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'Iransans',
-                    fontSize: textScaleFactor * 12.0,
+              InkWell(
+                onTap: () async {
+                  await showDialog(
+                          context: context,
+                          builder: (ctx) => CustomDialogSelectGender())
+                      .then((value) {
+                    updateGender(value);
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(
+                        5,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        timing.gender == 'male' ? 'آقایان' : 'خانم ها',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Iransans',
+                          fontSize: textScaleFactor * 12.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
+                ),
+              ),
+              InkWell(
+                onTap: () async {
+                  await showDialog(
+                          context: context,
+                          builder: (ctx) => CustomDialogSelectDiscounted())
+                      .then((value) {
+                    updateDiscount(value);
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    left: 8,
+                  ),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(
+                        5,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        EnArConvertor().replaceArNumber(
+                          '% ${timing.discount}',
+                        ),
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'Iransans',
+                          fontSize: textScaleFactor * 12.0,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
                 ),
               ),
               InkWell(

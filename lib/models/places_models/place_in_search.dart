@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:tapsalon_manager/models/places_models/place_type.dart';
 
-import '../image.dart';
+import '../imageObj.dart';
 import '../image_url.dart';
 import '../region.dart';
 
@@ -83,7 +83,7 @@ class PlaceInSearch with ChangeNotifier {
           : 0,
       likes_count:
           parsedJson['likes_count'] != null ? parsedJson['likes_count'] : 0,
-      rate: parsedJson['rate'] != null ? parsedJson['rate'] : 0,
+      rate: parsedJson['rate'] != null ? double.parse(parsedJson['rate'].toString()) : 0.0,
       visit: parsedJson['visit'] != null ? parsedJson['visit'] : 0,
       status: parsedJson['status'] != null ? parsedJson['status'] : 0,
       parent_id: parsedJson['parent_id'] != null ? parsedJson['parent_id'] : 0,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:tapsalon_manager/screen/user_profile/user_detail_info_screen.dart';
+import 'package:tapsalon_manager/widget/items/info_edit_item.dart';
 
 import '../../models/city.dart';
 import '../../models/province.dart';
@@ -554,74 +555,3 @@ class _UserDetailInfoEditScreenState extends State<UserDetailInfoEditScreen> {
   }
 }
 
-class InfoEditItem extends StatelessWidget {
-  const InfoEditItem({
-    Key key,
-    @required this.title,
-    @required this.controller,
-    @required this.keybordType,
-  }) : super(key: key);
-
-  final String title;
-  final TextEditingController controller;
-  final TextInputType keybordType;
-
-  @override
-  Widget build(BuildContext context) {
-    double deviceHeight = MediaQuery.of(context).size.height;
-    double deviceWidth = MediaQuery.of(context).size.width;
-    var textScaleFactor = MediaQuery.of(context).textScaleFactor;
-
-    return Container(
-//      width: deviceWidth * 0.8,
-      decoration: BoxDecoration(
-        color: AppTheme.white,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Container(
-          child: Wrap(
-            children: <Widget>[
-              Text(
-                '$title : ',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontFamily: 'Iransans',
-                  fontSize: textScaleFactor * 13.0,
-                ),
-              ),
-              Container(
-                color: Colors.white,
-                child: TextFormField(
-                  keyboardType: keybordType,
-                  onEditingComplete: () {},
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'لطفا مقداری را وارد نمایید';
-                    }
-                    return null;
-                  },
-                  
-                  textInputAction: TextInputAction.none,
-                  controller: controller,
-                  decoration: InputDecoration(
-                    contentPadding: EdgeInsets.only(right: 8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    labelStyle: TextStyle(
-                      color: Colors.blue,
-                      fontFamily: 'Iransans',
-                      fontSize: textScaleFactor * 10.0,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

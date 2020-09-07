@@ -14,7 +14,8 @@ class Urls {
   static const loginEndPoint = '/oauth/token';
   static const sendSMSEndPoint = '/api/sms';
   static const userEndPoint = '/api/user';
-  static const commentEndPoint = '/api/comments';
+  static const managerStatsEndPoint = '/api/user/stats';
+  static const commentEndPoint = '/api/user/comments';
   static const imageUploadEndPoint = '/api/images';
 
 

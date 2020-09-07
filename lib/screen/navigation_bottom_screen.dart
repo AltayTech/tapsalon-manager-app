@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart' as intl;
+import 'package:tapsalon_manager/screen/calendar_screen.dart';
 
 import '../provider/app_theme.dart';
 import '../provider/strings.dart';
@@ -25,12 +25,12 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
 
   final List<Map<String, Object>> _pages = [
     {
-      'page': HomeScreen(),
-      'title': Strings.navHome,
+      'page': CalendarScreen(),
+      'title': Strings.naveCalendar,
     },
     {
-      'page': MapScreen(),
-      'title': Strings.naveNearby,
+      'page': HomeScreen(),
+      'title': Strings.navHome,
     },
     {
       'page': ProfileView(),
@@ -38,7 +38,7 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
     }
   ];
 
-  int _selectedPageIndex = 0;
+  int _selectedPageIndex = 1;
 
   void _selectBNBItem(int index) {
     setState(
@@ -63,7 +63,6 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
       Navigator.pop(context);
 
       return false;
-
     } else {
       DateTime now = DateTime.now();
 
@@ -105,7 +104,6 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
     double deviceWidth = MediaQuery.of(context).size.width;
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
 
-
     return WillPopScope(
       onWillPop: onWillPop,
       child: Directionality(
@@ -144,18 +142,18 @@ class _NavigationBottomScreenState extends State<NavigationBottomScreen> {
             items: [
               BottomNavigationBarItem(
                 backgroundColor: AppTheme.white,
-                icon: Icon(Icons.home),
+                icon: Icon(
+                  Icons.calendar_today,
+                ),
                 title: Text(
-                  Strings.navHome,
+                  Strings.naveCalendar,
                 ),
               ),
               BottomNavigationBarItem(
                 backgroundColor: AppTheme.white,
-                icon: Icon(
-                  Icons.map,
-                ),
+                icon: Icon(Icons.home),
                 title: Text(
-                  Strings.naveNearby,
+                  Strings.navHome,
                 ),
               ),
               BottomNavigationBarItem(

@@ -3,9 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tapsalon_manager/models/user_models/manager_stats.dart';
 
-import '../models/main_notifications.dart';
-import '../models/notification.dart' as notification;
 import '../models/rule_data.dart';
 import '../models/searchDetails.dart';
 import '../models/user_models/user.dart';
@@ -35,11 +34,7 @@ class UserInfo with ChangeNotifier {
   String searchEndPoint;
   SearchDetails _notificationSearchDetails = _searchDetails_zero;
 
-  List<notification.Notification> _notificationItems = [];
-
   User get user => _user;
-
-  List<notification.Notification> get notificationItems => _notificationItems;
 
   Future<void> getUser() async {
     print('getUser');
@@ -143,52 +138,42 @@ class UserInfo with ChangeNotifier {
     }
   }
 
-  Future<void> getNotification() async {
-    print('getNotification');
+  List<RuleData> get ruleList => _ruleList;
 
-    final url = Urls.rootUrl + Urls.userEndPoint + '/notifications';
+  ManagerStats _managerStats;
+
+  ManagerStats get managerStats => _managerStats;
+
+  Future<void> getManagerStat() async {
+    print('getManagerStas');
+
+    final url = Urls.rootUrl + Urls.managerStatsEndPoint;
     print(url);
 
     final prefs = await SharedPreferences.getInstance();
 
     _token = prefs.getString('token');
-    if (_token != null) {
-      try {
-        final response = await get(url, headers: {
-          'Authorization': 'Bearer $_token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'version': Urls.versionCode
+    print(_token);
 
-        });
+    try {
+      final response = await get(url, headers: {
+        'Authorization': 'Bearer $_token',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'version': Urls.versionCode
+      });
 
-        final extractedData = json.decode(response.body);
+      final extractedData = json.decode(response.body);
+      print(extractedData);
 
-        MainNotifications mainNotifications =
-            MainNotifications.fromJson(extractedData);
+      ManagerStats managerStats = ManagerStats.fromJson(extractedData);
 
-        _notificationItems = mainNotifications.data;
-        _notificationSearchDetails = SearchDetails(
-          current_page: mainNotifications.current_page,
-          first_page_url: mainNotifications.first_page_url,
-          from: mainNotifications.from,
-          last_page: mainNotifications.last_page,
-          last_page_url: mainNotifications.last_page_url,
-          next_page_url: mainNotifications.next_page_url,
-          path: mainNotifications.path,
-          per_page: mainNotifications.per_page,
-          prev_page_url: mainNotifications.prev_page_url,
-          to: mainNotifications.to,
-          total: mainNotifications.total,
-        );
+      _managerStats = managerStats;
 
-        notifyListeners();
-      } catch (error) {
-        print(error.toString());
-        throw (error);
-      }
+      notifyListeners();
+    } catch (error) {
+      print(error.toString());
+      throw (error);
     }
   }
-
-  List<RuleData> get ruleList => _ruleList;
 }

@@ -6,12 +6,11 @@ import 'package:provider/provider.dart';
 import 'package:tapsalon_manager/models/city.dart';
 import 'package:tapsalon_manager/models/facility.dart';
 import 'package:tapsalon_manager/models/field.dart';
-import 'package:tapsalon_manager/models/image.dart';
+import 'package:tapsalon_manager/models/imageObj.dart';
 import 'package:tapsalon_manager/models/places_models/place.dart';
 import 'package:tapsalon_manager/models/places_models/place_in_send.dart';
 import 'package:tapsalon_manager/models/province.dart';
 import 'package:tapsalon_manager/models/region.dart';
-import 'package:tapsalon_manager/models/timing.dart';
 import 'package:tapsalon_manager/provider/auth.dart';
 import 'package:tapsalon_manager/provider/cities.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_gallery_edit_screen.dart';
@@ -24,6 +23,7 @@ import 'package:tapsalon_manager/widget/place_location_widget.dart';
 
 import '../../provider/app_theme.dart';
 import '../../provider/places.dart';
+import '../navigation_bottom_screen.dart';
 
 class PlaceDetailInfoEditScreen extends StatefulWidget {
   static const routeName = '/PlaceDetailInfoEditScreen';
@@ -124,6 +124,8 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
       final Map arguments = ModalRoute.of(context).settings.arguments as Map;
 
       loadedPlace = arguments['place'];
+
+      placeInSend = convertPlace(loadedPlace);
 
       if (loadedPlace.gallery.length < 1) {
         gallery.clear();
@@ -296,7 +298,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
     return placeInSend;
   }
 
-  Future<void> createSendPlace() {
+  Future<void> createSendPlace() async {
     Provider.of<Places>(context, listen: false).placeInSend.name =
         nameController.text;
 
@@ -314,6 +316,9 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
 
     Provider.of<Places>(context, listen: false).placeInSend.phone =
         phoneController.text;
+
+    Provider.of<Places>(context, listen: false).placeInSend.address =
+        addressController.text;
 
     Provider.of<Places>(context, listen: false).placeInSend.mobile =
         mobileController.text;
@@ -334,47 +339,8 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
     Provider.of<Places>(context, listen: false).placeInSend.gallery =
         getIdList(placeGallery);
 
-    print('galllllllllery' +
-        Provider.of<Places>(context, listen: false)
-            .placeInSend
-            .gallery
-            .toString());
-
-    Provider.of<Places>(context, listen: false).placeInSend.timings = [
-      Timing(
-        id: 0,
-        date_start: DateTime(2020, 1, 4, 10, 0, 0, 0, 0).toString(),
-        date_end: DateTime(2020, 1, 4, 10, 0, 0, 0, 0)
-            .add(Duration(hours: 10))
-            .toString(),
-        gender: 'male',
-        reservable: 1,
-        discount: 20,
-      ),
-      Timing(
-        id: 0,
-        date_start: DateTime(2020, 1, 5, 10, 0, 0, 0, 0).toString(),
-        date_end: DateTime(2020, 1, 5, 10, 0, 0, 0, 0)
-            .add(Duration(hours: 2))
-            .toString(),
-        gender: 'male',
-        reservable: 1,
-        discount: 20,
-      ),
-      Timing(
-        id: 0,
-        date_start: DateTime(
-          2020,
-          1,
-          7,
-          10,
-        ).toString(),
-        date_end: DateTime(2020, 1, 7, 10).add(Duration(hours: 2)).toString(),
-        gender: 'male',
-        reservable: 0,
-        discount: 20,
-      )
-    ];
+    Provider.of<Places>(context, listen: false).placeInSend.timings =
+        loadedPlace.timings;
   }
 
   Future<void> retrieveProvince() async {
@@ -505,10 +471,9 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
 
     var currencyFormat = intl.NumberFormat.decimalPattern();
 
-
     bool isLogin = Provider.of<Auth>(context, listen: false).isAuth;
 
-    loadedPlace = Provider.of<Places>(context,).itemPlace;
+    loadedPlace = Provider.of<Places>(context).itemPlace;
 
     return Scaffold(
       backgroundColor: AppTheme.bg,
@@ -527,159 +492,252 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
         backgroundColor: AppTheme.appBarColor,
         iconTheme: new IconThemeData(color: AppTheme.appBarIconColor),
       ),
-      body:
-      Container(
-        color: AppTheme.white,
-        child: Stack(
-          children: <Widget>[
-            Directionality(
-              textDirection: TextDirection.rtl,
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: <Widget>[
-                      GestureDetector(
-                        onTap: () {
-                          _showImageDialog();
-                        },
-                        child: Container(
-                          height: deviceWidth * 0.6,
-                          child: Stack(
-                            children: <Widget>[
-                              Container(
-                                decoration: BoxDecoration(
-                                    color: AppTheme.white,
-                                    border: Border.all(
-                                        width: 5, color: AppTheme.bg),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: CarouselSlider(
-                                  options: CarouselOptions(
-                                    viewportFraction: 1.0,
-                                    initialPage: 0,
-                                    enableInfiniteScroll: true,
-                                    reverse: false,
-                                    autoPlay:
-                                        gallery.length == 1 ? true : false,
-                                    height: double.infinity,
-                                    autoPlayInterval: Duration(seconds: 5),
-                                    autoPlayAnimationDuration:
-                                        Duration(milliseconds: 800),
-                                    enlargeCenterPage: true,
-                                    scrollDirection: Axis.horizontal,
-                                    onPageChanged: (index, _) {
-                                      _current = index;
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: Container(
+          color: AppTheme.white,
+          height: deviceHeight,
+          child: Stack(
+            children: <Widget>[
+              Directionality(
+                textDirection: TextDirection.rtl,
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            _showImageDialog();
+                          },
+                          child: Container(
+                            height: deviceWidth * 0.6,
+                            child: Stack(
+                              children: <Widget>[
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: AppTheme.white,
+                                      border: Border.all(
+                                          width: 5, color: AppTheme.bg),
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: CarouselSlider(
+                                    options: CarouselOptions(
+                                      viewportFraction: 1.0,
+                                      initialPage: 0,
+                                      enableInfiniteScroll: true,
+                                      reverse: false,
+                                      autoPlay:
+                                          gallery.length == 1 ? true : false,
+                                      height: double.infinity,
+                                      autoPlayInterval: Duration(seconds: 5),
+                                      autoPlayAnimationDuration:
+                                          Duration(milliseconds: 800),
+                                      enlargeCenterPage: true,
+                                      scrollDirection: Axis.horizontal,
+                                      onPageChanged: (index, _) {
+                                        _current = index;
 
-                                      setState(() {});
-                                    },
-                                    autoPlayCurve: Curves.fastOutSlowIn,
+                                        setState(() {});
+                                      },
+                                      autoPlayCurve: Curves.fastOutSlowIn,
+                                    ),
+                                    items: gallery.map((gallery) {
+                                      return Builder(
+                                        builder: (BuildContext context) {
+                                          return Container(
+                                            width: deviceWidth,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              child: gallery.url.large
+                                                      .startsWith(
+                                                          'assets/images')
+                                                  ? Image.asset(
+                                                      gallery.url.medium,
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.network(
+                                                      gallery.url.medium,
+                                                      fit: BoxFit.cover,
+                                                      loadingBuilder: (BuildContext
+                                                              context,
+                                                          Widget child,
+                                                          ImageChunkEvent
+                                                              loadingProgress) {
+                                                        if (loadingProgress ==
+                                                            null) return child;
+
+                                                        return Center(
+                                                          child:
+                                                              CircularProgressIndicator(
+                                                            value: loadingProgress
+                                                                        .expectedTotalBytes !=
+                                                                    null
+                                                                ? loadingProgress
+                                                                        .cumulativeBytesLoaded /
+                                                                    loadingProgress
+                                                                        .expectedTotalBytes
+                                                                : null,
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    }).toList(),
                                   ),
-                                  items: gallery.map((gallery) {
-                                    return Builder(
-                                      builder: (BuildContext context) {
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  left: 0.0,
+                                  right: 0.0,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: gallery.map<Widget>(
+                                      (index) {
                                         return Container(
-                                          width: deviceWidth,
-                                          child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            child: gallery.url.large
-                                                    .startsWith('assets/images')
-                                                ? Image.asset(
-                                                    gallery.url.medium,
-                                                    fit: BoxFit.cover,
-                                                  )
-                                                : Image.network(
-                                                    gallery.url.medium,
-                                                    fit: BoxFit.cover,
-                                                    loadingBuilder: (BuildContext
-                                                            context,
-                                                        Widget child,
-                                                        ImageChunkEvent
-                                                            loadingProgress) {
-                                                      if (loadingProgress ==
-                                                          null) return child;
-
-                                                      return Center(
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                          value: loadingProgress
-                                                                      .expectedTotalBytes !=
-                                                                  null
-                                                              ? loadingProgress
-                                                                      .cumulativeBytesLoaded /
-                                                                  loadingProgress
-                                                                      .expectedTotalBytes
-                                                              : null,
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
+                                          width: 10.0,
+                                          height: 10.0,
+                                          margin: EdgeInsets.symmetric(
+                                              vertical: 20.0, horizontal: 2.0),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                                color: AppTheme.h1, width: 0.4),
+                                            color: _current ==
+                                                    gallery.indexOf(index)
+                                                ? AppTheme.iconColor
+                                                : AppTheme.bg,
                                           ),
                                         );
                                       },
-                                    );
-                                  }).toList(),
+                                    ).toList(),
+                                  ),
                                 ),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                left: 0.0,
-                                right: 0.0,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: gallery.map<Widget>(
-                                    (index) {
-                                      return Container(
-                                        width: 10.0,
-                                        height: 10.0,
-                                        margin: EdgeInsets.symmetric(
-                                            vertical: 20.0, horizontal: 2.0),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                              color: AppTheme.h1, width: 0.4),
-                                          color:
-                                              _current == gallery.indexOf(index)
-                                                  ? AppTheme.iconColor
-                                                  : AppTheme.bg,
-                                        ),
-                                      );
-                                    },
-                                  ).toList(),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      EditInfoItem(
-                        title: 'نام مکان',
-                        controller: nameController,
-                        keybordType: TextInputType.text,
-                      ),
-                      EditInfoItem(
-                        title: 'درباره',
-                        controller: aboutController,
-                        keybordType: TextInputType.text,
-                      ),
-                      EditInfoItem(
-                        title: 'هزینه (تومان)',
-                        controller: priceController,
-                        keybordType: TextInputType.number,
-                      ),
-                      EditInfoItem(
-                        title: 'آدرس',
-                        controller: addressController,
-                        keybordType: TextInputType.text,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: Container(
+                        EditInfoItem(
+                          title: 'نام مکان',
+                          controller: nameController,
+                          keybordType: TextInputType.text,
+                        ),
+                        EditInfoItem(
+                          title: 'درباره',
+                          controller: aboutController,
+                          keybordType: TextInputType.text,
+                        ),
+                        EditInfoItem(
+                          title: 'هزینه (تومان)',
+                          controller: priceController,
+                          keybordType: TextInputType.number,
+                        ),
+                        EditInfoItem(
+                          title: 'آدرس',
+                          controller: addressController,
+                          keybordType: TextInputType.text,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 8),
+                          child: Container(
+                            child: Wrap(
+                              children: <Widget>[
+                                Text(
+                                  'استان: ',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontFamily: 'Iransans',
+                                    fontSize: textScaleFactor * 13.0,
+                                  ),
+                                ),
+                                Container(
+                                  width: deviceWidth,
+                                  child: Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Container(
+                                      alignment: Alignment.centerRight,
+                                      decoration: BoxDecoration(
+                                          color: AppTheme.white,
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          border: Border.all(
+                                            color: Colors.green,
+                                          )),
+                                      child: DropdownButton<String>(
+                                        value: provinceValue,
+                                        icon: Icon(
+                                          Icons.arrow_drop_down,
+                                          color: Colors.orange,
+                                        ),
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Iransans',
+                                          fontSize: textScaleFactor * 13.0,
+                                        ),
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            provinceValue = newValue;
+
+                                            provinceId = provinceList[
+                                                    provinceValueList
+                                                        .indexOf(newValue)]
+                                                .id;
+
+                                            citiesValue = null;
+
+                                            cityId = null;
+
+                                            regionValue = null;
+
+                                            regionId = null;
+
+                                            retrieveCities(provinceId);
+                                          });
+                                        },
+                                        underline: Container(
+                                          color: AppTheme.white,
+                                        ),
+                                        items: provinceValueList
+                                            .map<DropdownMenuItem<String>>(
+                                                (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Container(
+                                              width: deviceWidth * 0.6,
+                                              child: Text(
+                                                value,
+                                                textAlign: TextAlign.end,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontFamily: 'Iransans',
+                                                  fontSize:
+                                                      textScaleFactor * 13.0,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 8),
                           child: Wrap(
                             children: <Widget>[
                               Text(
-                                'استان: ',
+                                'شهر: ',
                                 style: TextStyle(
                                   color: Colors.grey,
                                   fontFamily: 'Iransans',
@@ -699,7 +757,7 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                           color: Colors.green,
                                         )),
                                     child: DropdownButton<String>(
-                                      value: provinceValue,
+                                      value: citiesValue,
                                       icon: Icon(
                                         Icons.arrow_drop_down,
                                         color: Colors.orange,
@@ -709,30 +767,25 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                         fontFamily: 'Iransans',
                                         fontSize: textScaleFactor * 13.0,
                                       ),
-                                      onChanged: (newValue) {
+                                      onChanged: (String newValue) {
                                         setState(() {
-                                          provinceValue = newValue;
+                                          citiesValue = newValue;
 
-                                          provinceId = provinceList[
-                                                  provinceValueList
-                                                      .indexOf(newValue)]
+                                          cityId = citiesList[citiesValueList
+                                                  .indexOf(newValue)]
                                               .id;
-
-                                          citiesValue = null;
-
-                                          cityId = null;
 
                                           regionValue = null;
 
                                           regionId = null;
 
-                                          retrieveCities(provinceId);
+                                          retrieveRegions(cityId);
                                         });
                                       },
                                       underline: Container(
                                         color: AppTheme.white,
                                       ),
-                                      items: provinceValueList
+                                      items: citiesValueList
                                           .map<DropdownMenuItem<String>>(
                                               (String value) {
                                         return DropdownMenuItem<String>(
@@ -759,287 +812,360 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                             ],
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: Wrap(
-                          children: <Widget>[
-                            Text(
-                              'شهر: ',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontFamily: 'Iransans',
-                                fontSize: textScaleFactor * 13.0,
-                              ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppTheme.white,
                             ),
-                            Container(
-                              width: deviceWidth,
-                              child: Directionality(
-                                textDirection: TextDirection.ltr,
-                                child: Container(
-                                  alignment: Alignment.centerRight,
-                                  decoration: BoxDecoration(
-                                      color: AppTheme.white,
-                                      borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
-                                        color: Colors.green,
-                                      )),
-                                  child: DropdownButton<String>(
-                                    value: citiesValue,
-                                    icon: Icon(
-                                      Icons.arrow_drop_down,
-                                      color: Colors.orange,
+                            child: Wrap(
+                              children: <Widget>[
+                                Text(
+                                  'منطقه',
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontFamily: 'Iransans',
+                                    fontSize: textScaleFactor * 13.0,
+                                  ),
+                                ),
+                                Container(
+                                  width: deviceWidth,
+                                  child: Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Container(
+                                      alignment: Alignment.centerRight,
+                                      decoration: BoxDecoration(
+                                          color: AppTheme.white,
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          border: Border.all(
+                                            color: Colors.green,
+                                          )),
+                                      child: DropdownButton<String>(
+                                        value: regionValue,
+                                        icon: Icon(
+                                          Icons.arrow_drop_down,
+                                          color: Colors.orange,
+                                        ),
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Iransans',
+                                          fontSize: textScaleFactor * 13.0,
+                                        ),
+                                        onChanged: (String newValue) {
+                                          setState(() {
+                                            regionValue = newValue;
+
+                                            regionId = regionList[
+                                                    regionValueList
+                                                        .indexOf(newValue)]
+                                                .id;
+                                          });
+                                        },
+                                        underline: Container(
+                                          color: AppTheme.white,
+                                        ),
+                                        items: regionValueList
+                                            .map<DropdownMenuItem<String>>(
+                                                (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Container(
+                                              width: deviceWidth * 0.6,
+                                              child: Text(
+                                                value,
+                                                textAlign: TextAlign.end,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontFamily: 'Iransans',
+                                                  fontSize:
+                                                      textScaleFactor * 13.0,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
                                     ),
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Iransans',
-                                      fontSize: textScaleFactor * 13.0,
-                                    ),
-                                    onChanged: (String newValue) {
-                                      setState(() {
-                                        citiesValue = newValue;
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        EditInfoItem(
+                          title: 'تلفن',
+                          controller: phoneController,
+                          keybordType: TextInputType.phone,
+                        ),
+                        EditInfoItem(
+                          title: 'موبایل',
+                          controller: mobileController,
+                          keybordType: TextInputType.phone,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8, top: 8),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color: AppTheme.white,
+                                border:
+                                    Border.all(width: 2, color: AppTheme.white),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 6,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        'رشته ها',
+                                        style: TextStyle(
+                                          fontFamily: 'Iransans',
+                                          color: AppTheme.grey,
+                                          fontSize: textScaleFactor * 14.0,
+                                        ),
+                                      ),
+                                      Spacer(),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  width: deviceWidth,
+                                  child: Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Container(
+                                      alignment: Alignment.centerRight,
+                                      decoration: BoxDecoration(
+                                          color: AppTheme.white,
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          border: Border.all(
+                                            color: Colors.green,
+                                          )),
+                                      child: DropdownButton<String>(
+                                        value: fieldValue,
+                                        icon: Icon(
+                                          Icons.arrow_drop_down,
+                                          color: Colors.orange,
+                                        ),
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Iransans',
+                                          fontSize: textScaleFactor * 13.0,
+                                        ),
+                                        onChanged: (String newValue) {
+                                          FocusScope.of(context)
+                                              .requestFocus(new FocusNode());
 
-                                        cityId = citiesList[citiesValueList
-                                                .indexOf(newValue)]
-                                            .id;
-
-                                        regionValue = null;
-
-                                        regionId = null;
-
-                                        retrieveRegions(cityId);
-                                      });
-                                    },
-                                    underline: Container(
-                                      color: AppTheme.white,
-                                    ),
-                                    items: citiesValueList
-                                        .map<DropdownMenuItem<String>>(
-                                            (String value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Container(
-                                          width: deviceWidth * 0.6,
+                                          setState(() {
+                                            placeFieldsList.add(fieldList[
+                                                fieldValueList
+                                                    .indexOf(newValue)]);
+                                          });
+                                        },
+                                        underline: Container(
+                                          color: AppTheme.white,
+                                        ),
+                                        hint: Align(
+                                          alignment: Alignment.centerRight,
                                           child: Text(
-                                            value,
-                                            textAlign: TextAlign.end,
+                                            'امکانات مورد نظر خود راانتخاب کنید',
+                                            textAlign: TextAlign.start,
                                             style: TextStyle(
-                                              color: Colors.black,
+                                              color: Colors.grey,
                                               fontFamily: 'Iransans',
                                               fontSize: textScaleFactor * 13.0,
                                             ),
                                           ),
                                         ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppTheme.white,
-                          ),
-                          child: Wrap(
-                            children: <Widget>[
-                              Text(
-                                'منطقه',
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontFamily: 'Iransans',
-                                  fontSize: textScaleFactor * 13.0,
-                                ),
-                              ),
-                              Container(
-                                width: deviceWidth,
-                                child: Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Container(
-                                    alignment: Alignment.centerRight,
-                                    decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                          color: Colors.green,
-                                        )),
-                                    child: DropdownButton<String>(
-                                      value: regionValue,
-                                      icon: Icon(
-                                        Icons.arrow_drop_down,
-                                        color: Colors.orange,
-                                      ),
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'Iransans',
-                                        fontSize: textScaleFactor * 13.0,
-                                      ),
-                                      onChanged: (String newValue) {
-                                        setState(() {
-                                          regionValue = newValue;
-
-                                          regionId = regionList[regionValueList
-                                                  .indexOf(newValue)]
-                                              .id;
-                                        });
-                                      },
-                                      underline: Container(
-                                        color: AppTheme.white,
-                                      ),
-                                      items: regionValueList
-                                          .map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Container(
-                                            width: deviceWidth * 0.6,
-                                            child: Text(
-                                              value,
-                                              textAlign: TextAlign.end,
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontFamily: 'Iransans',
-                                                fontSize:
-                                                    textScaleFactor * 13.0,
+                                        items: fieldValueList
+                                            .map<DropdownMenuItem<String>>(
+                                                (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Container(
+                                              width: deviceWidth * 0.6,
+                                              child: Text(
+                                                value,
+                                                textAlign: TextAlign.start,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontFamily: 'Iransans',
+                                                  fontSize:
+                                                      textScaleFactor * 13.0,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      }).toList(),
+                                          );
+                                        }).toList(),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 6.0, bottom: 6),
+                                  child: Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    alignment: WrapAlignment.center,
+                                    children: placeFieldsList
+                                        .map((e) =>
+                                            ChangeNotifierProvider.value(
+                                              value: e,
+                                              child: Chip(
+                                                onDeleted: () {
+                                                  placeFieldsList.removeAt(
+                                                      placeFieldsList
+                                                          .indexOf(e));
+                                                  setState(() {});
+                                                },
+                                                deleteIcon: Center(
+                                                  child: Icon(
+                                                    Icons.clear,
+                                                    size: 20,
+                                                  ),
+                                                ),
+                                                label: Text(
+                                                  e.name,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Iransans',
+                                                    color: Colors.black,
+                                                    fontSize:
+                                                        textScaleFactor * 14.0,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ))
+                                        .toList(),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      EditInfoItem(
-                        title: 'تلفن',
-                        controller: phoneController,
-                        keybordType: TextInputType.phone,
-                      ),
-                      EditInfoItem(
-                        title: 'موبایل',
-                        controller: mobileController,
-                        keybordType: TextInputType.phone,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8, top: 8),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: AppTheme.white,
-                              border:
-                                  Border.all(width: 2, color: AppTheme.white),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 6,
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8, top: 8),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color: AppTheme.white,
+                                border:
+                                    Border.all(width: 2, color: AppTheme.white),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 6,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        'امکانات',
+                                        style: TextStyle(
+                                          fontFamily: 'Iransans',
+                                          color: AppTheme.grey,
+                                          fontSize: textScaleFactor * 14.0,
+                                        ),
+                                      ),
+                                      Spacer(),
+                                    ],
+                                  ),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'رشته ها',
-                                      style: TextStyle(
-                                        fontFamily: 'Iransans',
-                                        color: AppTheme.grey,
-                                        fontSize: textScaleFactor * 14.0,
-                                      ),
-                                    ),
-                                    Spacer(),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                width: deviceWidth,
-                                child: Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Container(
-                                    alignment: Alignment.centerRight,
-                                    decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                          color: Colors.green,
-                                        )),
-                                    child: DropdownButton<String>(
-                                      value: fieldValue,
-                                      icon: Icon(
-                                        Icons.arrow_drop_down,
-                                        color: Colors.orange,
-                                      ),
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'Iransans',
-                                        fontSize: textScaleFactor * 13.0,
-                                      ),
-                                      onChanged: (String newValue) {
-                                        setState(() {
-                                          placeFieldsList.add(fieldList[
-                                              fieldValueList
-                                                  .indexOf(newValue)]);
-                                        });
-                                      },
-                                      underline: Container(
-                                        color: AppTheme.white,
-                                      ),
-                                      hint: Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Text(
-                                          'امکانات مورد نظر خود راانتخاب کنید',
-                                          textAlign: TextAlign.start,
+                                Container(
+                                  width: deviceWidth,
+                                  child: Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Container(
+                                      alignment: Alignment.centerRight,
+                                      decoration: BoxDecoration(
+                                          color: AppTheme.white,
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                          border: Border.all(
+                                            color: Colors.green,
+                                          )),
+                                      child: DropdownButton<String>(
+                                        value: facilityValue,
+                                        icon: Icon(
+                                          Icons.arrow_drop_down,
+                                          color: Colors.orange,
+                                        ),
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Iransans',
+                                          fontSize: textScaleFactor * 13.0,
+                                        ),
+                                        onChanged: (String newValue) {
+                                          FocusScope.of(context)
+                                              .requestFocus(new FocusNode());
+
+                                          setState(() {
+                                            placeFacilitiesList.add(
+                                                facilityList[facilityValueList
+                                                    .indexOf(newValue)]);
+                                          });
+                                        },
+                                        hint: Text(
+                                          'رشته های مورد نظر خود راانتخاب کنید',
+                                          textAlign: TextAlign.end,
                                           style: TextStyle(
                                             color: Colors.grey,
                                             fontFamily: 'Iransans',
                                             fontSize: textScaleFactor * 13.0,
                                           ),
                                         ),
-                                      ),
-                                      items: fieldValueList
-                                          .map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Container(
-                                            width: deviceWidth * 0.6,
-                                            child: Text(
-                                              value,
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontFamily: 'Iransans',
-                                                fontSize:
-                                                    textScaleFactor * 13.0,
+                                        underline: Container(
+                                          color: AppTheme.white,
+                                        ),
+                                        items: facilityValueList
+                                            .map<DropdownMenuItem<String>>(
+                                                (String value) {
+                                          return DropdownMenuItem<String>(
+                                            value: value,
+                                            child: Container(
+                                              width: deviceWidth * 0.6,
+                                              child: Text(
+                                                value,
+                                                textAlign: TextAlign.end,
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontFamily: 'Iransans',
+                                                  fontSize:
+                                                      textScaleFactor * 13.0,
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      }).toList(),
+                                          );
+                                        }).toList(),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 6.0, bottom: 6),
-                                child: Wrap(
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  alignment: WrapAlignment.center,
-                                  children: placeFieldsList
-                                      .map((e) => ChangeNotifierProvider.value(
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 6.0, bottom: 6),
+                                  child: Wrap(
+                                    crossAxisAlignment:
+                                        WrapCrossAlignment.center,
+                                    alignment: WrapAlignment.center,
+                                    children: placeFacilitiesList
+                                        .map(
+                                          (e) => ChangeNotifierProvider.value(
                                             value: e,
                                             child: Chip(
                                               onDeleted: () {
-                                                placeFieldsList.removeAt(
-                                                    placeFieldsList.indexOf(e));
+                                                placeFacilitiesList.removeAt(
+                                                    placeFacilitiesList
+                                                        .indexOf(e));
                                                 setState(() {});
                                               },
                                               deleteIcon: Center(
@@ -1060,376 +1186,255 @@ class _PlaceDetailInfoEditScreenState extends State<PlaceDetailInfoEditScreen>
                                                 textAlign: TextAlign.center,
                                               ),
                                             ),
-                                          ))
-                                      .toList(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8, top: 8),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: AppTheme.white,
-                              border:
-                                  Border.all(width: 2, color: AppTheme.white),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 6,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      'امکانات',
-                                      style: TextStyle(
-                                        fontFamily: 'Iransans',
-                                        color: AppTheme.grey,
-                                        fontSize: textScaleFactor * 14.0,
-                                      ),
-                                    ),
-                                    Spacer(),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                width: deviceWidth,
-                                child: Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Container(
-                                    alignment: Alignment.centerRight,
-                                    decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(5),
-                                        border: Border.all(
-                                          color: Colors.green,
-                                        )),
-                                    child: DropdownButton<String>(
-                                      value: facilityValue,
-                                      icon: Icon(
-                                        Icons.arrow_drop_down,
-                                        color: Colors.orange,
-                                      ),
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: 'Iransans',
-                                        fontSize: textScaleFactor * 13.0,
-                                      ),
-                                      onChanged: (String newValue) {
-                                        setState(() {
-                                          placeFacilitiesList.add(facilityList[
-                                              facilityValueList
-                                                  .indexOf(newValue)]);
-                                        });
-                                      },
-                                      hint: Text(
-                                        'رشته های مورد نظر خود راانتخاب کنید',
-                                        textAlign: TextAlign.end,
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontFamily: 'Iransans',
-                                          fontSize: textScaleFactor * 13.0,
-                                        ),
-                                      ),
-                                      underline: Container(
-                                        color: AppTheme.white,
-                                      ),
-                                      items: facilityValueList
-                                          .map<DropdownMenuItem<String>>(
-                                              (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Container(
-                                            width: deviceWidth * 0.6,
-                                            child: Text(
-                                              value,
-                                              textAlign: TextAlign.end,
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontFamily: 'Iransans',
-                                                fontSize:
-                                                    textScaleFactor * 13.0,
-                                              ),
-                                            ),
                                           ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 6.0, bottom: 6),
-                                child: Wrap(
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  alignment: WrapAlignment.center,
-                                  children: placeFacilitiesList
-                                      .map(
-                                        (e) => ChangeNotifierProvider.value(
-                                          value: e,
-                                          child: Chip(
-                                            onDeleted: () {
-                                              placeFacilitiesList.removeAt(
-                                                  placeFacilitiesList
-                                                      .indexOf(e));
-                                              setState(() {});
-                                            },
-                                            deleteIcon: Center(
-                                              child: Icon(
-                                                Icons.clear,
-                                                size: 20,
-                                              ),
-                                            ),
-                                            label: Text(
-                                              e.name,
-                                              style: TextStyle(
-                                                fontFamily: 'Iransans',
-                                                color: Colors.black,
-                                                fontSize:
-                                                    textScaleFactor * 14.0,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                            ),
-                                          ),
-                                        ),
-                                      )
-                                      .toList(),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8, top: 8),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: AppTheme.white,
-                              border:
-                                  Border.all(width: 2, color: AppTheme.white),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 6,
-                                    ),
-                                    child: Text(
-                                      'گالری',
-                                      style: TextStyle(
-                                        fontFamily: 'Iransans',
-                                        color: AppTheme.grey,
-                                        fontSize: textScaleFactor * 14.0,
-                                      ),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  InkWell(
-                                    onTap: () async {
-                                      await createSendPlace();
-                                      int placeId =
-                                          await sendChange();
-                                      Navigator.pushNamed(context,
-                                          PlaceGalleryEditScreen.routeName,
-                                          arguments: {
-                                            'placeId': placeId,
-                                            'place': loadedPlace,
-                                          });
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 6,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            'ویرایش گالری',
-                                            style: TextStyle(
-                                              fontFamily: 'Iransans',
-                                              color: AppTheme.iconColor,
-                                              fontSize: textScaleFactor * 14.0,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 6.0, bottom: 6),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey)),
-                                  width: double.infinity,
-                                  child: Wrap(
-                                    crossAxisAlignment:
-                                        WrapCrossAlignment.center,
-                                    alignment: WrapAlignment.center,
-                                    children: loadedPlace.gallery
-                                        .map(
-                                          (e) => ChangeNotifierProvider.value(
-                                              value: e,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Image.network(
-                                                  e.url.medium,
-                                                  height: 60,
-                                                  width: 100,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              )),
                                         )
                                         .toList(),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8, top: 8),
-                        child: Container(
-                          height: 350,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: AppTheme.white,
-                              border:
-                                  Border.all(width: 2, color: AppTheme.white),
-                              borderRadius: BorderRadius.circular(10)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: <Widget>[
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      top: 6,
-                                    ),
-                                    child: Text(
-                                      'مکان بر روی نقشه',
-                                      style: TextStyle(
-                                        fontFamily: 'Iransans',
-                                        color: AppTheme.grey,
-                                        fontSize: textScaleFactor * 14.0,
-                                      ),
-                                    ),
-                                  ),
-                                  Spacer(),
-                                  InkWell(
-                                    onTap: () async {
-                                      await showDialog<String>(
-                                          context: context,
-                                          builder: (ctx) => LocationPickDialog(
-                                                place: loadedPlace,
-                                              ));
-                                    },
-                                    child: Padding(
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8, top: 8),
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color: AppTheme.white,
+                                border:
+                                    Border.all(width: 2, color: AppTheme.white),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Row(
+                                  children: [
+                                    Padding(
                                       padding: const EdgeInsets.only(
                                         top: 6,
                                       ),
                                       child: Text(
-                                        'ویرایش موقعیت',
+                                        'گالری',
                                         style: TextStyle(
                                           fontFamily: 'Iransans',
-                                          color: AppTheme.iconColor,
+                                          color: AppTheme.grey,
                                           fontSize: textScaleFactor * 14.0,
                                         ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 6.0),
-                                child: Container(
-                                  height: 300,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey)),
-                                  child: loadedPlace.latitude != 0 &&
-                                          loadedPlace.longitude != 0
-                                      ? PlaceLocationWidget(
-                                          place: loadedPlace,
-                                        )
-                                      : Center(
-                                          child: Text(
-                                            'موقعیت ثبت نشده',
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(
-                                              fontFamily: 'Iransans',
-                                              color: AppTheme.grey,
-                                              fontSize: textScaleFactor * 12.0,
-                                            ),
-                                          ),
+                                    Spacer(),
+                                    InkWell(
+                                      onTap: () async {
+                                        await createSendPlace();
+                                        int placeId = await sendChange();
+                                        print('placeId' + placeId.toString());
+                                        Navigator.pushNamed(context,
+                                            PlaceGalleryEditScreen.routeName,
+                                            arguments: {
+                                              'placeId': placeId,
+                                              'place': loadedPlace
+                                            });
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 6,
                                         ),
+                                        child: Row(
+                                          children: [
+                                            Text(
+                                              'ویرایش گالری',
+                                              style: TextStyle(
+                                                fontFamily: 'Iransans',
+                                                color: AppTheme.iconColor,
+                                                fontSize:
+                                                    textScaleFactor * 14.0,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 6.0, bottom: 6),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey)),
+                                    width: double.infinity,
+                                    child: Wrap(
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      alignment: WrapAlignment.center,
+                                      children: loadedPlace.gallery
+                                          .map(
+                                            (e) => ChangeNotifierProvider.value(
+                                                value: e,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Image.network(
+                                                    e.url.medium,
+                                                    height: 60,
+                                                    width: 100,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                )),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 50,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            _isLoading
-                ? SpinKitFadingCircle(
-                    itemBuilder: (BuildContext context, int index) {
-                      return DecoratedBox(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: index.isEven
-                              ? AppTheme.spinerColor
-                              : AppTheme.spinerColor,
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8, top: 8),
+                          child: Container(
+                            height: 350,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                                color: AppTheme.white,
+                                border:
+                                    Border.all(width: 2, color: AppTheme.white),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 6,
+                                      ),
+                                      child: Text(
+                                        'مکان بر روی نقشه',
+                                        style: TextStyle(
+                                          fontFamily: 'Iransans',
+                                          color: AppTheme.grey,
+                                          fontSize: textScaleFactor * 14.0,
+                                        ),
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    InkWell(
+                                      onTap: () async {
+                                        await showDialog<String>(
+                                            context: context,
+                                            builder: (ctx) =>
+                                                LocationPickDialog(
+                                                  place: loadedPlace,
+                                                ));
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          top: 6,
+                                        ),
+                                        child: Text(
+                                          'ویرایش موقعیت',
+                                          style: TextStyle(
+                                            fontFamily: 'Iransans',
+                                            color: AppTheme.iconColor,
+                                            fontSize: textScaleFactor * 14.0,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6.0),
+                                  child: Container(
+                                    height: 300,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.grey)),
+                                    child: placeInSend.latitude != 0 &&
+                                            placeInSend.longitude != 0
+                                        ? PlaceLocationWidget(
+                                            id: loadedPlace.id,
+                                            name: loadedPlace.name,
+                                            typeId: loadedPlace.placeType.id,
+                                            latitude:
+                                                placeInSend.latitude != null
+                                                    ? placeInSend.latitude
+                                                    : loadedPlace.latitude,
+                                            longitude:
+                                                placeInSend.longitude != null
+                                                    ? placeInSend.longitude
+                                                    : loadedPlace.longitude,
+                                          )
+                                        : Center(
+                                            child: Text(
+                                              'موقعیت ثبت نشده',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontFamily: 'Iransans',
+                                                color: AppTheme.grey,
+                                                fontSize:
+                                                    textScaleFactor * 12.0,
+                                              ),
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      );
-                    },
-                  )
-                : Container(),
-            Positioned(
-              right: 20,
-              left: 20,
-              bottom: 20,
-              height: 60,
-              child: RaisedButton(
-                color: AppTheme.buttonColor,
-                onPressed: () async {
-                  await createSendPlace();
-
-                  await sendChange();
-                },
-                child: Text(
-                  'تایید اطلاعات',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Iransans',
-                    color: AppTheme.white,
-                    fontSize: textScaleFactor * 14.0,
+                        SizedBox(
+                          height: 50,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              _isLoading
+                  ? SpinKitFadingCircle(
+                      itemBuilder: (BuildContext context, int index) {
+                        return DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: index.isEven
+                                ? AppTheme.spinerColor
+                                : AppTheme.spinerColor,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(),
+              Positioned(
+                right: 20,
+                left: 20,
+                bottom: 20,
+                height: 60,
+                child: RaisedButton(
+                  color: AppTheme.buttonColor,
+                  onPressed: () async {
+                    await createSendPlace();
+
+                    await sendChange().then((value) {
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          NavigationBottomScreen.routeName,
+                          (Route<dynamic> route) => false);
+                    });
+                  },
+                  child: Text(
+                    'تایید اطلاعات',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Iransans',
+                      color: AppTheme.white,
+                      fontSize: textScaleFactor * 14.0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       endDrawer: Theme(

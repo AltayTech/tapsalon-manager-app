@@ -31,13 +31,13 @@ class _WeekDayRowState extends State<WeekDayRow> {
     String weekDayName = 'شنبه';
 
     List<String> weekDays = [
-      'شنبه',
-      'یکشنبه',
       'دوشنبه',
       'سه شنبه',
       'چهارشنبه',
       'پنج شنبه',
       'جمعه',
+      'شنبه',
+      'یکشنبه',
     ];
 
     weekDayName = weekDays[widget.weekDay - 1];
@@ -53,16 +53,23 @@ class _WeekDayRowState extends State<WeekDayRow> {
   }
 
   Future<void> createTimingItem() {
+    int day = 0;
+    if (widget.weekDay > 5) {
+      day = widget.weekDay-6+4 ;
+    } else {
+      day = widget.weekDay+1+4;
+    }
     Provider.of<Places>(context, listen: false).timingListTable[dayIndex].add(
           Timing(
             id: null,
             discount: 0,
             reservable: 1,
             gender: 'male',
-            date_start: DateTime(2020, 1, widget.weekDay + 3, 10).toString(),
-            date_end: DateTime(2020, 1, widget.weekDay + 3, 20).toString(),
+            date_start: DateTime(2020, 1, day, 10).toString(),
+            date_end: DateTime(2020, 1, day, 20).toString(),
           ),
         );
+
     setState(() {});
   }
 
@@ -70,6 +77,7 @@ class _WeekDayRowState extends State<WeekDayRow> {
     Provider.of<Places>(context, listen: false)
         .timingListTable[dayIndex]
         .removeAt(index);
+
     setState(() {});
   }
 
@@ -77,6 +85,7 @@ class _WeekDayRowState extends State<WeekDayRow> {
     Provider.of<Places>(context, listen: false)
         .timingListTable[dayIndex][index]
         .date_start = startTime.toString();
+
     setState(() {});
   }
 
@@ -84,6 +93,7 @@ class _WeekDayRowState extends State<WeekDayRow> {
     Provider.of<Places>(context, listen: false)
         .timingListTable[dayIndex][index]
         .date_end = endTime.toString();
+
     setState(() {});
   }
 
@@ -91,15 +101,28 @@ class _WeekDayRowState extends State<WeekDayRow> {
     Provider.of<Places>(context, listen: false)
         .timingListTable[dayIndex][index]
         .gender = gender;
+
+    setState(() {});
+  }
+
+  Future<void> updateDiscounted(int discount, int index) {
+    Provider.of<Places>(context, listen: false)
+        .timingListTable[dayIndex][index]
+        .discount = discount != null ? discount : 0;
+
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
+
     double deviceWidth = MediaQuery.of(context).size.width;
+
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
+
     var currencyFormat = intl.NumberFormat.decimalPattern();
+
     loadedPlace = Provider.of<Places>(context).itemPlace;
 
     timingListTable = Provider.of<Places>(context).timingListTable;
@@ -134,7 +157,6 @@ class _WeekDayRowState extends State<WeekDayRow> {
               children: [
                 Container(
                   height: 60,
-//                                        width: 200,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: timingListTable[dayIndex].length,
@@ -142,7 +164,7 @@ class _WeekDayRowState extends State<WeekDayRow> {
                     itemBuilder: (BuildContext context, int index) {
                       return TimingItem(
                         timing: timingListTable[dayIndex][index],
-                        dateTime: DateTime(2020, 1, dayIndex + 4),
+                        dateTime: DateTime(2020, 1, dayIndex),
                         removeTime: () {
                           removeTimingItem(index);
                         },
@@ -155,14 +177,29 @@ class _WeekDayRowState extends State<WeekDayRow> {
                         updateGender: (value) {
                           updateGender(value, index);
                         },
+                        updateDiscount: (value) {
+                          updateDiscounted(value, index);
+                        },
                       );
                     },
                   ),
                 ),
-                RaisedButton(
-                  onPressed: () {
-                    createTimingItem();
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    width: 60,
+                    height: 50,
+                    child: RaisedButton(
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                      ),
+                      color: Colors.green,
+                      onPressed: () {
+                        createTimingItem();
+                      },
+                    ),
+                  ),
                 )
               ],
             ),

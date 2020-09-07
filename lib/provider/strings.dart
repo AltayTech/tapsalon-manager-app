@@ -5,6 +5,7 @@ class Strings {
   static const navHome = 'خانه';
   static const naveFavorite = 'سالن های مورد علاقه';
   static const naveNearby = 'سالن های نزدیک';
+  static const naveCalendar = 'تقویم';
   static const navProfile = 'پروفایل';
   static const navReservse = 'رزروها';
 

@@ -11,18 +11,6 @@ class SplashScreens extends StatefulWidget {
 }
 
 class _SplashScreensState extends State<SplashScreens> {
-  bool _isInit = true;
-
-  @override
-  void didChangeDependencies() {
-//    if (_isInit) {
-//      Provider.of<Products>(context, listen: false).fetchAndSetHomeData();
-//    }
-//    _isInit = false;
-
-    super.didChangeDependencies();
-  }
-
   @override
   Widget build(BuildContext context) {
     return SplashScreen(
@@ -30,26 +18,21 @@ class _SplashScreensState extends State<SplashScreens> {
       navigateAfterSeconds: NavigationBottomScreen(),
       title: Text(
         'تاپ سالن',
-        style: AppTheme.textTheme.headline4.copyWith(color: Color(0xff149D49),
-        fontWeight: FontWeight.bold),
-//        TextStyle(
-//          fontFamily: 'Iransans',
-//          fontSize: MediaQuery.of(context).textScaleFactor * 30,
-//          color: Color(0xff149D49),
-//        ),
+        style: AppTheme.textTheme.headline4
+            .copyWith(color: Color(0xff149D49), fontWeight: FontWeight.bold),
         textAlign: TextAlign.center,
       ),
-      subtitle:Text(
-        'مرجع اماکن ورزشی',
+      subtitle: Text(
+        'اپلیکیشن مدیریت',
         style: TextStyle(
           fontFamily: 'Iransans',
           fontSize: MediaQuery.of(context).textScaleFactor * 20,
           color: Colors.grey,
         ),
         textAlign: TextAlign.center,
-      ) ,
+      ),
       loadingText: Text(
-        EnArConvertor().replaceArNumber('نسخه 4.0.18'),
+        EnArConvertor().replaceArNumber('نسخه 1.0.1'),
         style: TextStyle(
           fontFamily: 'Iransans',
           fontWeight: FontWeight.w400,
@@ -61,10 +44,6 @@ class _SplashScreensState extends State<SplashScreens> {
         'assets/images/tapsalon_icon_200.png',
         fit: BoxFit.cover,
       ),
-//      gradientBackground: LinearGradient(
-//          begin: Alignment.topRight,
-//          end: Alignment.bottomLeft,
-//          colors: [Color(0xff006DB5), Color(0xff008AB5), Color(0xff01A89E)]),
       styleTextUnderTheLoader: TextStyle(),
       photoSize: 70.0,
       onClick: () => print("Flutter Egypt"),

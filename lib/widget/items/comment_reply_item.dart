@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:provider/provider.dart';
+import 'package:tapsalon_manager/models/comment_reply.dart';
 import 'package:tapsalon_manager/provider/app_theme.dart';
-import 'package:tapsalon_manager/provider/places.dart';
-import 'package:tapsalon_manager/screen/place_detail/comment_create_screen.dart';
-import 'package:tapsalon_manager/widget/items/comment_reply_item.dart';
 
-import '../../models/comment.dart';
 import '../en_to_ar_number_convertor.dart';
 
-class CommentItem extends StatefulWidget {
-  final Comment comment;
+class CommentReplyItem extends StatefulWidget {
+  final CommentReply comment;
 
-  CommentItem({this.comment});
+  CommentReplyItem({this.comment});
 
   @override
-  _CommentItemState createState() => _CommentItemState();
+  _CommentReplyItemState createState() => _CommentReplyItemState();
 }
 
-class _CommentItemState extends State<CommentItem> {
+class _CommentReplyItemState extends State<CommentReplyItem> {
   var _isLoading = false;
 
   String getDuration(String time) {
@@ -81,12 +77,12 @@ class _CommentItemState extends State<CommentItem> {
 
     return LayoutBuilder(
       builder: (context, constraint) => Padding(
-        padding: const EdgeInsets.only(top: 8.0),
+        padding: const EdgeInsets.only(top: 8, right: 16),
         child: Container(
           decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                    blurRadius: 2, color: Colors.grey.withOpacity(0.3), spreadRadius: 2),
+                    blurRadius: 2, color: AppTheme.primary, spreadRadius: 2),
               ],
               color: AppTheme.white,
 //                          border: Border.all(width: 5, color: AppTheme.bg),
@@ -149,84 +145,6 @@ class _CommentItemState extends State<CommentItem> {
                             fontSize: textScaleFactor * 14.0,
                           ),
                         ),
-                      ),
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.only(left: 10, top: 1),
-                          child: InkWell(
-                            onTap: () async {
-                              Navigator.of(context).pushNamed(
-                                  CommentCreateScreen.routeName,
-                                  arguments: widget.comment);
-                            },
-                            child: Text(
-                              'پاسخ',
-                              textAlign: TextAlign.right,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                              style: TextStyle(
-                                fontFamily: 'Iransans',
-                                color: AppTheme.iconColor,
-                                fontSize: textScaleFactor * 12.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Spacer(),
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            right: 1,
-                            left: 3.0,
-                            top: 1,
-                          ),
-                          child: Icon(
-                            Icons.star,
-                            color: AppTheme.iconColor,
-                            size: 25,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 5, top: 8),
-                          child: Text(
-                            EnArConvertor().replaceArNumber(
-                              widget.comment.rate.toString(),
-                            ),
-                            textAlign: TextAlign.right,
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontFamily: 'Iransans',
-                              color: AppTheme.grey,
-                              fontSize: textScaleFactor * 16.0,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      width: deviceWidth,
-//                      height: deviceHeight * 0.69,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Consumer<Places>(
-                        builder: (context, value, child) {
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            primary: false,
-                            itemCount: widget.comment.replies.length,
-                            itemBuilder: (ctx, i) =>
-                                ChangeNotifierProvider.value(
-                              value: widget.comment.replies[i],
-                              child: CommentReplyItem(
-                                comment: widget.comment.replies[i],
-                              ),
-                            ),
-                          );
-                        },
                       ),
                     ),
                   ],

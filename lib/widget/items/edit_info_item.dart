@@ -22,18 +22,21 @@ class EditInfoItem extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Column(
         children: <Widget>[
-          Row(
-            children: [
-              Text(
-                '$title : ',
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontFamily: 'Iransans',
-                  fontSize: textScaleFactor * 13.0,
+          Padding(
+            padding: const EdgeInsets.only( bottom: 8),
+            child: Row(
+              children: [
+                Text(
+                  '$title : ',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontFamily: 'Iransans',
+                    fontSize: textScaleFactor * 13.0,
+                  ),
                 ),
-              ),
-              Spacer(),
-            ],
+                Spacer(),
+              ],
+            ),
           ),
           Container(
             color: Colors.white,
@@ -50,12 +53,13 @@ class EditInfoItem extends StatelessWidget {
               ),
               textAlign: TextAlign.start,
               decoration: InputDecoration(
+
 //                fillColor: Colors.white,
 //                filled: true,
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
                   borderSide: BorderSide(
-                    color: Colors.green,
+                    color: Colors.grey,
                   ),
                 ),
 

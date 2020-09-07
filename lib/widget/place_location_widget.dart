@@ -5,15 +5,26 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:tapsalon_manager/models/places_models/place.dart';
 import 'package:tapsalon_manager/provider/app_theme.dart';
 
 class PlaceLocationWidget extends StatefulWidget {
   static const routeName = '/PlaceLocationScreen';
-  final Place place;
+
+  // final PlaceInSend place;
+  final double latitude;
+  final double longitude;
+  final int typeId;
+  final int id;
+
+  final String name;
 
   PlaceLocationWidget({
-    this.place,
+    // this.place,
+    this.longitude,
+    this.latitude,
+    this.typeId,
+    this.id,
+    this.name,
   });
 
   @override
@@ -40,15 +51,12 @@ class _PlaceLocationWidgetState extends State<PlaceLocationWidget>
 
   double speed;
 
-  Place selectedPlace;
-
   @override
   void didChangeDependencies() {
     if (_isInit) {
       searchItem();
 
-      _lastMapPosition =
-          LatLng(selectedPlace.latitude, selectedPlace.longitude);
+      _lastMapPosition = LatLng(widget.latitude, widget.longitude);
     }
     _isInit = false;
     super.didChangeDependencies();
@@ -59,37 +67,36 @@ class _PlaceLocationWidgetState extends State<PlaceLocationWidget>
       _isLoading = true;
     });
 
-    selectedPlace = widget.place;
-
     await setCustomMapPin();
 
-    _onAddMarker(selectedPlace);
+    _onAddMarker(widget.typeId, widget.latitude, widget.longitude, widget.name,
+        widget.id);
 
     setState(() {
       _isLoading = false;
     });
   }
 
-  void _onAddMarker(Place place) async {
+  void _onAddMarker(int typeId, double latitude, double longitude, String name,
+      int id) async {
     _markers.clear();
-    print(place.latitude);
-    print(place.longitude);
-    var latLng = LatLng(place.latitude, place.longitude);
+
+    var latLng = LatLng(latitude, longitude);
     var pinLocationIcon;
-    if (place.placeType.id == 1) {
+    if (typeId == 1) {
       pinLocationIcon = pinLocationIconSalon;
-    } else if (place.placeType.id == 2) {
+    } else if (typeId == 2) {
       pinLocationIcon = pinLocationIconEnt;
-    } else if (place.placeType.id == 3) {
+    } else if (typeId == 3) {
       pinLocationIcon = pinLocationIconGym;
     } else {
       pinLocationIcon = pinLocationIconSalon;
     }
 
     _markers.add(Marker(
-      markerId: MarkerId(place.id.toString()),
+      markerId: MarkerId(id.toString()),
       infoWindow: InfoWindow(
-        title: place.name,
+        title: name,
       ),
       position: latLng,
       icon: pinLocationIcon,
@@ -175,6 +182,7 @@ class _PlaceLocationWidgetState extends State<PlaceLocationWidget>
     var currencyFormat = intl.NumberFormat.decimalPattern();
 
     var textScaleFactor = MediaQuery.of(context).textScaleFactor;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Stack(

@@ -34,7 +34,7 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
 
   @override
   void initState() {
-    _tabController = TabController(vsync: this, length: 4);
+    _tabController = TabController(vsync: this, length: 3);
 
     _tabController.addListener(_handleTabSelection);
 
@@ -84,7 +84,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     double deviceHeight = MediaQuery.of(context).size.height;
@@ -121,16 +120,6 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
           padding: const EdgeInsets.all(8.0),
           child: Text(
             'نظرات',
-            style: TextStyle(
-                fontFamily: 'Iransans', fontSize: textScaleFactor * 16.0),
-          ),
-        ),
-      ),
-      Tab(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            'اعلانات',
             style: TextStyle(
                 fontFamily: 'Iransans', fontSize: textScaleFactor * 16.0),
           ),
@@ -202,28 +191,25 @@ class _PlaceDetailScreenState extends State<PlaceDetailScreen>
                     Expanded(
                       child: _isLoading
                           ? SpinKitFadingCircle(
-                        itemBuilder: (BuildContext context, int index) {
-                          return DecoratedBox(
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: index.isEven
-                                  ? AppTheme.spinerColor
-                                  : AppTheme.spinerColor,
-                            ),
-                          );
-                        },
-                      )
+                              itemBuilder: (BuildContext context, int index) {
+                                return DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: index.isEven
+                                        ? AppTheme.spinerColor
+                                        : AppTheme.spinerColor,
+                                  ),
+                                );
+                              },
+                            )
                           : TabBarView(
-                        controller: _tabController,
-                        children: [
-                          PlaceDetailInfoScreen(),
-                          PlaceDetailTimingScreen(),
-                          PlaceDetailCommentsScreen(),
-                          Container(
-                            child: Text('4'),
-                          ),
-                        ],
-                      ),
+                              controller: _tabController,
+                              children: [
+                                PlaceDetailInfoScreen(),
+                                PlaceDetailTimingScreen(),
+                                PlaceDetailCommentsScreen(),
+                              ],
+                            ),
                     ),
                   ],
                 ),

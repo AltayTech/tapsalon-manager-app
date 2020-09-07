@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:tapsalon_manager/models/image.dart';
+import 'package:tapsalon_manager/models/imageObj.dart';
 
 class CustomDialogShowPicture extends StatelessWidget {
   final ImageObj image;

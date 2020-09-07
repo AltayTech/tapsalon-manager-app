@@ -82,7 +82,7 @@ class _CustomDialogSelectImagePickerState
                                     listen: false)
                                 .imageSource = ImageSource.gallery;
                             return
-                              Navigator.of(context).pop();
+                              Navigator.of(context).pop(true);
                           },
                           child: Container(
                             height: constraint.maxHeight * 0.08,
@@ -126,7 +126,7 @@ class _CustomDialogSelectImagePickerState
                                 listen: false)
                                 .imageSource = ImageSource.camera;
                             return
-                            Navigator.of(context).pop();
+                              Navigator.of(context).pop(true);
                           },
                           child: Container(
                             height: constraint.maxHeight * 0.08,

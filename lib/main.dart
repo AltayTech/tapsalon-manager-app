@@ -1,15 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:tapsalon_manager/screen/calendar_screen.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_create_screen.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_detail_info_edit_screen.dart';
-import 'package:tapsalon_manager/screen/place_detail/place_detail_screen_test.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_detail_timing_edit_screen.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_gallery_edit_screen.dart';
 
 import './provider/auth.dart';
 import './provider/places.dart';
-import './provider/salons.dart';
 import './provider/strings.dart';
 import './provider/user_info.dart';
 import './screen/about_us_screen.dart';
@@ -30,7 +30,9 @@ import 'screen/user_profile/user_detail_info_edit_screen.dart';
 import 'screen/user_profile/user_detail_info_screen.dart';
 import 'screen/user_profile/user_detail_reserve_screen.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  initializeDateFormatting().then((_) => runApp(MyApp()));
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -50,9 +52,6 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
-          ChangeNotifierProvider(
-            create: (ctx) => Salons(),
-          ),
           ChangeNotifierProvider(
             create: (ctx) => Cities(),
           ),
@@ -75,7 +74,7 @@ class _MyAppState extends State<MyApp> {
             MaterialApp(
           title: Strings.appTitle,
           theme: ThemeData(
-            primaryColor: AppTheme.white,
+            primaryColor: Colors.green,
             backgroundColor: AppTheme.bg,
             textTheme: AppTheme.textTheme,
           ),
@@ -102,7 +101,7 @@ class _MyAppState extends State<MyApp> {
             PlaceDetailInfoEditScreen.routeName: (ctx) =>
                 PlaceDetailInfoEditScreen(),
             PlaceGalleryEditScreen.routeName: (ctx) => PlaceGalleryEditScreen(),
-            PlaceDetailScreenTest.routeName: (ctx) => PlaceDetailScreenTest(),
+            CalendarScreen.routeName: (ctx) => CalendarScreen(),
             PlaceDetailTimingEditScreen.routeName: (ctx) =>
                 PlaceDetailTimingEditScreen(),
           },

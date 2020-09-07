@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tapsalon_manager/models/city.dart';
-import 'package:tapsalon_manager/models/image.dart';
+import 'package:tapsalon_manager/models/imageObj.dart';
 import 'package:tapsalon_manager/models/image_url.dart';
 import 'package:tapsalon_manager/models/places_models/main_places.dart';
 import 'package:tapsalon_manager/models/places_models/place.dart';
@@ -300,8 +300,8 @@ class Places with ChangeNotifier {
     print('searchItem ffff' + _items.length.toString());
   }
 
-  Future<List<PlaceInSearch>> retrieveCityPlaces(
-      int cityId, String orderby) async {
+  Future<List<PlaceInSearch>> retrieveCityPlaces(int cityId,
+      String orderby) async {
     print('retrieveCityPlaces');
     String url = '';
     if (cityId == 0) {
@@ -347,8 +347,8 @@ class Places with ChangeNotifier {
     return loadedPlaces;
   }
 
-  Future<List<PlaceInSearch>> retrieveNewItemInCity(
-      City selectedCity, String orderby) async {
+  Future<List<PlaceInSearch>> retrieveNewItemInCity(City selectedCity,
+      String orderby) async {
     List<PlaceInSearch> loadedPlaces = [];
 
     loadedPlaces = await retrieveCityPlaces(selectedCity.id, orderby);
@@ -414,6 +414,7 @@ class Places with ChangeNotifier {
     print(_token);
 
     try {
+
       final response = await post(
         url,
         headers: {
@@ -428,13 +429,16 @@ class Places with ChangeNotifier {
             province: provinceId,
             city: cityId,
             status: 2,
-
           ),
         ),
       );
-      print(response.body);
+      print('ccccccnnnooot send');
+
+      print(response.body.toString());
+
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
+
         final extractedData = json.decode(response.body);
         print(extractedData.toString());
         PlaceInSend mainPlaces = PlaceInSend.fromJson(extractedData);
@@ -496,7 +500,7 @@ class Places with ChangeNotifier {
 
         print(response.headers.toString());
 
-        placeInSend.id=placeInSendEditied.id;
+        placeInSend.id = placeInSendEditied.id;
         notifyListeners();
 
         print('ccccccnnn send');
@@ -516,11 +520,11 @@ class Places with ChangeNotifier {
     }
   }
 
-  Future<void> sendComment(
-      int placeId, String content, double rate, String subject) async {
-    print('sendComment');
+  Future<void> sendCommentReply(int placeId, String content,
+      int parentId) async {
+    print('sendCommentReplay');
 
-    final url = Urls.rootUrl + Urls.commentEndPoint;
+    final url = Urls.rootUrl + Urls.commentEndPoint + '/$parentId' + '/reply';
     print(url);
 
     final prefs = await SharedPreferences.getInstance();
@@ -541,8 +545,8 @@ class Places with ChangeNotifier {
           {
             'place_id': placeId,
             'content': content,
-            'rate': rate,
-            'subject': subject,
+            'rate': null,
+            'subject': 'جواب',
           },
         ),
       );
@@ -559,10 +563,8 @@ class Places with ChangeNotifier {
     }
   }
 
-  Future<void> sendCommentReport(
-    int placeId,
-    int commentId,
-  ) async {
+  Future<void> sendCommentReport(int placeId,
+      int commentId,) async {
     print('sendCommentReport');
 
     final url = Urls.rootUrl + Urls.commentEndPoint;
@@ -747,6 +749,7 @@ class Places with ChangeNotifier {
     var response = await request.send();
 
     response.stream.transform(utf8.decoder).listen((value) {
+
       print(value);
     });
   }

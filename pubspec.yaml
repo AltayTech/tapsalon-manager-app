@@ -24,20 +24,21 @@ dependencies:
   image_picker: ^0.6.7+4
   url_launcher: ^5.4.5
   uploadcare_client: ^2.0.0
-#  google_map_location_picker: ^3.3.3
-#  place_picker: ^0.9.14
   shamsi_date: ^0.8.1
   carousel_slider: ^2.1.0
   photo_view: ^0.10.0
   fluttertoast: ^7.0.2
   najvaflutter: ^1.2.8
-#  google_maps_place_picker: ^0.9.5
+  neumorphic: ^0.4.0
+  numberpicker: ^1.2.1
+  table_calendar: ^2.2.3
 
   cupertino_icons: ^0.1.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.7.5
 #  build_web_compilers: ^2.11.0
+  test: ^1.15.2
 
   flutter_test:
     sdk: flutter
@@ -56,12 +57,10 @@ flutter:
     - assets/images/tapsalon_icon_200.png
     - assets/images/login_bg.png
     - assets/images/circle.gif
-    - assets/images/circle2.gif
     - assets/images/instagram.png
     - assets/images/telegram.png
     - assets/images/login_header_pic.png
-    - assets/images/main_page_ent_ic.png
-    - assets/images/main_page_gym_ic.png
+
     - assets/images/main_page_salon_ic.png
     - assets/images/user_Icon.png
     - assets/images/marker_ic_1_v1.png
@@ -80,6 +79,8 @@ flutter:
     - assets/images/main_page_visit_ic.png
     - assets/images/main_page_comment_ic.png
     - assets/images/main_page_place_ic.png
+    - assets/images/man_athelate_ic.png
+    - assets/images/woman_athelate_ic.png
 
   fonts:
 

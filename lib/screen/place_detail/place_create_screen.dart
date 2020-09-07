@@ -7,6 +7,7 @@ import 'package:tapsalon_manager/models/province.dart';
 import 'package:tapsalon_manager/provider/cities.dart';
 import 'package:tapsalon_manager/screen/place_detail/place_detail_screen.dart';
 import 'package:tapsalon_manager/widget/dialogs/custom_dialog.dart';
+import 'package:tapsalon_manager/widget/items/info_edit_item.dart';
 
 import '../../models/user_models/user.dart';
 import '../../provider/app_theme.dart';
@@ -159,6 +160,7 @@ class _PlaceCreateScreenState extends State<PlaceCreateScreen> {
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
+          elevation: 0,
           backgroundColor: AppTheme.appBarColor,
           iconTheme: new IconThemeData(color: AppTheme.appBarIconColor),
         ),
@@ -176,10 +178,11 @@ class _PlaceCreateScreenState extends State<PlaceCreateScreen> {
             textDirection: TextDirection.rtl,
             child: Container(
               height: deviceHeight * 0.9,
+              color: Colors.white,
               child: Stack(
                 children: <Widget>[
                   Container(
-                    color: Colors.transparent,
+                    color: Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: SingleChildScrollView(
@@ -199,7 +202,8 @@ class _PlaceCreateScreenState extends State<PlaceCreateScreen> {
                               child: Column(
                                 children: <Widget>[
                                   Padding(
-                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    padding: const EdgeInsets.only(
+                                        bottom: 6, top: 8),
                                     child: Text(
                                       'ثبت نام اولیه مکان:',
                                       style: TextStyle(
@@ -214,108 +218,88 @@ class _PlaceCreateScreenState extends State<PlaceCreateScreen> {
                                     controller: placeNameController,
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      width: deviceWidth * 0.8,
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.white,
-                                        borderRadius: BorderRadius.circular(5),
-                                      ),
-                                      child: Wrap(
-                                        children: <Widget>[
-                                          Text(
-                                            'استان : ',
-                                            style: TextStyle(
+                                    padding: const EdgeInsets.only(
+                                        top: 8, bottom: 8, left: 4, right: 4),
+                                    child: Wrap(
+                                      children: <Widget>[
+                                        Text(
+                                          'استان : ',
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontFamily: 'Iransans',
+                                            fontSize: textScaleFactor * 13.0,
+                                          ),
+                                        ),
+                                        Container(
+                                          width: deviceWidth,
+                                          alignment: Alignment.centerRight,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            border: Border.all(
                                               color: Colors.grey,
-                                              fontFamily: 'Iransans',
-                                              fontSize: textScaleFactor * 13.0,
                                             ),
+                                            borderRadius:
+                                                BorderRadius.circular(5),
                                           ),
-                                          Container(
-                                            width: deviceWidth,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              border: Border.all(
-                                                  color: Colors.grey,
-                                                  width: 0.4),
-                                              borderRadius:
-                                                  BorderRadius.circular(5),
-                                            ),
-                                            child: Directionality(
-                                              textDirection: TextDirection.ltr,
-                                              child: Container(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                decoration: BoxDecoration(
-                                                    color: AppTheme.white,
-                                                    border: Border.all(
-                                                        color: Colors.grey,
-                                                        width: 0.3)),
-                                                child: DropdownButton<String>(
-                                                  value: provinceValue,
-                                                  icon: Icon(
-                                                    Icons.arrow_drop_down,
-                                                    color: Colors.orange,
-                                                  ),
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontFamily: 'Iransans',
-                                                    fontSize:
-                                                        textScaleFactor * 13.0,
-                                                  ),
-                                                  onChanged: (newValue) {
-                                                    setState(() {
-                                                      provinceValue = newValue;
-                                                      provinceId = provinceList[
-                                                              provinceValueList
-                                                                  .indexOf(
-                                                                      newValue)]
-                                                          .id;
-                                                      retrieveCities(
-                                                          provinceId);
-                                                    });
-                                                  },
-                                                  underline: Container(
-                                                    color: AppTheme.white,
-                                                  ),
-                                                  items: provinceValueList.map<
-                                                          DropdownMenuItem<
-                                                              String>>(
-                                                      (String value) {
-                                                    return DropdownMenuItem<
-                                                        String>(
-                                                      value: value,
-                                                      child: Container(
-                                                        width:
-                                                            deviceWidth * 0.6,
-                                                        child: Text(
-                                                          value,
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontFamily:
-                                                                'Iransans',
-                                                            fontSize:
-                                                                textScaleFactor *
-                                                                    13.0,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                ),
+                                          child: Directionality(
+                                            textDirection: TextDirection.ltr,
+                                            child: DropdownButton<String>(
+                                              value: provinceValue,
+                                              icon: Icon(
+                                                Icons.arrow_drop_down,
+                                                color: Colors.orange,
                                               ),
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontFamily: 'Iransans',
+                                                fontSize:
+                                                    textScaleFactor * 13.0,
+                                              ),
+                                              onChanged: (newValue) {
+                                                setState(() {
+                                                  provinceValue = newValue;
+                                                  provinceId = provinceList[
+                                                          provinceValueList
+                                                              .indexOf(
+                                                                  newValue)]
+                                                      .id;
+                                                  retrieveCities(provinceId);
+                                                });
+                                              },
+                                              underline: Container(
+                                                color: AppTheme.white,
+                                              ),
+                                              items: provinceValueList.map<
+                                                      DropdownMenuItem<String>>(
+                                                  (String value) {
+                                                return DropdownMenuItem<String>(
+                                                  value: value,
+                                                  child: Container(
+                                                    width: deviceWidth * 0.6,
+                                                    child: Text(
+                                                      value,
+                                                      textAlign: TextAlign.end,
+                                                      style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontFamily: 'Iransans',
+                                                        fontSize:
+                                                            textScaleFactor *
+                                                                13.0,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }).toList(),
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.only(
+                                        top: 8, bottom: 8, left: 4, right: 4),
                                     child: Container(
-                                      width: deviceWidth * 0.8,
                                       decoration: BoxDecoration(
                                         color: AppTheme.white,
                                       ),
@@ -331,77 +315,68 @@ class _PlaceCreateScreenState extends State<PlaceCreateScreen> {
                                           ),
                                           Container(
                                             width: deviceWidth,
+                                            alignment: Alignment.centerRight,
                                             decoration: BoxDecoration(
                                               color: AppTheme.white,
                                               border: Border.all(
-                                                  color: Colors.grey,
-                                                  width: 0.4),
+                                                color: Colors.grey,
+                                              ),
                                               borderRadius:
                                                   BorderRadius.circular(5),
                                             ),
                                             child: Directionality(
                                               textDirection: TextDirection.ltr,
-                                              child: Container(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                decoration: BoxDecoration(
-                                                    color: AppTheme.white,
-                                                    border: Border.all(
-                                                        color: Colors.grey,
-                                                        width: 0.4)),
-                                                child: DropdownButton<String>(
-                                                  value: citiesValue,
-                                                  icon: Icon(
-                                                    Icons.arrow_drop_down,
-                                                    color: Colors.orange,
-                                                  ),
-                                                  style: TextStyle(
-                                                    color: Colors.black,
-                                                    fontFamily: 'Iransans',
-                                                    fontSize:
-                                                        textScaleFactor * 13.0,
-                                                  ),
-                                                  onChanged: (String newValue) {
-                                                    setState(() {
-                                                      citiesValue = newValue;
+                                              child: DropdownButton<String>(
+                                                value: citiesValue,
+                                                icon: Icon(
+                                                  Icons.arrow_drop_down,
+                                                  color: Colors.orange,
+                                                ),
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontFamily: 'Iransans',
+                                                  fontSize:
+                                                      textScaleFactor * 13.0,
+                                                ),
+                                                onChanged: (String newValue) {
+                                                  setState(() {
+                                                    citiesValue = newValue;
 
-                                                      cityId = citiesList[
-                                                              citiesValueList
-                                                                  .indexOf(
-                                                                      newValue)]
-                                                          .id;
-                                                    });
-                                                  },
-                                                  underline: Container(
-                                                    color: AppTheme.white,
-                                                  ),
-                                                  items: citiesValueList.map<
-                                                          DropdownMenuItem<
-                                                              String>>(
-                                                      (String value) {
-                                                    return DropdownMenuItem<
-                                                        String>(
-                                                      value: value,
-                                                      child: Container(
-                                                        width:
-                                                            deviceWidth * 0.6,
-                                                        child: Text(
-                                                          value,
-                                                          textAlign:
-                                                              TextAlign.end,
-                                                          style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontFamily:
-                                                                'Iransans',
-                                                            fontSize:
-                                                                textScaleFactor *
-                                                                    13.0,
-                                                          ),
+                                                    cityId = citiesList[
+                                                            citiesValueList
+                                                                .indexOf(
+                                                                    newValue)]
+                                                        .id;
+                                                  });
+                                                },
+                                                underline: Container(
+                                                  color: AppTheme.white,
+                                                ),
+                                                items: citiesValueList.map<
+                                                        DropdownMenuItem<
+                                                            String>>(
+                                                    (String value) {
+                                                  return DropdownMenuItem<
+                                                      String>(
+                                                    value: value,
+                                                    child: Container(
+                                                      width: deviceWidth * 0.6,
+                                                      child: Text(
+                                                        value,
+                                                        textAlign:
+                                                            TextAlign.end,
+                                                        style: TextStyle(
+                                                          color: Colors.black,
+                                                          fontFamily:
+                                                              'Iransans',
+                                                          fontSize:
+                                                              textScaleFactor *
+                                                                  13.0,
                                                         ),
                                                       ),
-                                                    );
-                                                  }).toList(),
-                                                ),
+                                                    ),
+                                                  );
+                                                }).toList(),
                                               ),
                                             ),
                                           ),
@@ -411,6 +386,9 @@ class _PlaceCreateScreenState extends State<PlaceCreateScreen> {
                                   ),
                                 ],
                               ),
+                            ),
+                            SizedBox(
+                              height: 50,
                             ),
                           ],
                         ),
@@ -453,93 +431,6 @@ class _PlaceCreateScreenState extends State<PlaceCreateScreen> {
           child: Icon(
             Icons.check,
             color: AppTheme.white,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class InfoEditItem extends StatelessWidget {
-  const InfoEditItem({
-    Key key,
-    @required this.title,
-    @required this.controller,
-    @required this.keybordType,
-    @required this.bgColor,
-    @required this.iconColor,
-  }) : super(key: key);
-
-  final String title;
-  final TextEditingController controller;
-  final TextInputType keybordType;
-
-  final Color bgColor;
-  final Color iconColor;
-
-  @override
-  Widget build(BuildContext context) {
-    double deviceHeight = MediaQuery.of(context).size.height;
-    double deviceWidth = MediaQuery.of(context).size.width;
-    var textScaleFactor = MediaQuery.of(context).textScaleFactor;
-
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        width: deviceWidth * 0.8,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(5),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Container(
-            child: Wrap(
-              children: <Widget>[
-                Icon(
-                  Icons.arrow_right,
-                  color: iconColor,
-                ),
-                Text(
-                  '$title : ',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontFamily: 'Iransans',
-                    fontSize: textScaleFactor * 13.0,
-                  ),
-                ),
-                Container(
-                  color: Colors.white,
-                  child: Form(
-                    child: Container(
-                      height: deviceHeight * 0.05,
-                      child: TextFormField(
-                        keyboardType: keybordType,
-                        onEditingComplete: () {},
-                        validator: (value) {
-                          if (value.isEmpty) {
-                            return 'لطفا مقداری را وارد نمایید';
-                          }
-                          return null;
-                        },
-                        textInputAction: TextInputAction.none,
-                        controller: controller,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          labelStyle: TextStyle(
-                            color: Colors.blue,
-                            fontFamily: 'Iransans',
-                            fontSize: textScaleFactor * 10.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),

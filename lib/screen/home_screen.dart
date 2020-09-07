@@ -4,7 +4,9 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
 import 'package:tapsalon_manager/models/places_models/place_in_search.dart';
 import 'package:tapsalon_manager/models/searchDetails.dart';
+import 'package:tapsalon_manager/models/user_models/manager_stats.dart';
 import 'package:tapsalon_manager/provider/app_theme.dart';
+import 'package:tapsalon_manager/provider/user_info.dart';
 import 'package:tapsalon_manager/widget/en_to_ar_number_convertor.dart';
 import 'package:tapsalon_manager/widget/items/main_topic_item.dart';
 import 'package:tapsalon_manager/widget/items/place_item.dart';
@@ -33,6 +35,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   ScrollController _scrollController = new ScrollController();
 
+  ManagerStats managerStats = ManagerStats(
+    places: 0,
+    comments: 0,
+    likes: 0,
+    visits: 0,
+  );
+
   @override
   void initState() {
     _scrollController.addListener(() {
@@ -53,6 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _isLoading = true;
     });
+    await Provider.of<UserInfo>(context, listen: false).getManagerStat();
+
+    managerStats = Provider.of<UserInfo>(context, listen: false).managerStats;
 
     await Provider.of<Places>(context, listen: false).searchItem();
 
@@ -111,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.only(
                               top: 4.0, bottom: 4, left: 4),
                           child: MainTopicItem(
-                            number: 4,
+                            number: managerStats.places,
                             title: 'مکان',
                             icon: 'assets/images/main_page_place_ic.png',
                             bgColor: AppTheme.white,
@@ -122,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: MainTopicItem(
-                            number: 15,
+                            number: managerStats.comments,
                             title: 'نظر',
                             icon: 'assets/images/main_page_comment_ic.png',
                             bgColor: AppTheme.white,
@@ -133,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: MainTopicItem(
-                            number: 200000,
+                            number: managerStats.visits,
                             title: 'بازدید',
                             icon: 'assets/images/main_page_visit_ic.png',
                             bgColor: AppTheme.white,
@@ -145,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           padding: const EdgeInsets.only(
                               top: 4.0, bottom: 4, right: 4),
                           child: MainTopicItem(
-                            number: 10000,
+                            number: managerStats.likes,
                             title: 'لایک',
                             icon: 'assets/images/main_page_like_ic.png',
                             bgColor: AppTheme.white,

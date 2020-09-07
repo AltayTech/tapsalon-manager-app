@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../models/facility.dart';
 import '../../models/field.dart';
-import '../../models/image.dart';
+import '../../models/imageObj.dart';
 import '../city.dart';
 import '../image_url.dart';
 import '../places_models/place_type.dart';
@@ -34,6 +34,7 @@ class Place with ChangeNotifier {
   final Province province;
   final City city;
   final Region region;
+  final int parent_id;
 
 //  final UserInComplex user;
   final int likes_count;
@@ -65,6 +66,7 @@ class Place with ChangeNotifier {
       this.province,
       this.city,
       this.region,
+      this.parent_id,
 //      this.user,
       this.likes_count,
       this.comments_count,
@@ -141,6 +143,7 @@ class Place with ChangeNotifier {
       province: Province.fromJson(parsedJson['ostan']),
       city: City.fromJson(parsedJson['city']),
       region: Region.fromJson(parsedJson['region']),
+      parent_id: parsedJson['parent_id'],
 //      user: UserInComplex.fromJson(parsedJson['user']),
       likes_count: parsedJson['likes_count'] != null
           ? int.parse(parsedJson['likes_count'].toString())

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:provider/provider.dart';
-import 'package:tapsalon_manager/models/image.dart';
+import 'package:tapsalon_manager/models/imageObj.dart';
 import 'package:tapsalon_manager/models/places_models/place.dart';
 import 'package:tapsalon_manager/widget/dialogs/custom_dialog_show_picture.dart';
 import 'package:tapsalon_manager/widget/en_to_ar_number_convertor.dart';
@@ -435,7 +435,7 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                                   Container(
                                     width: double.infinity,
                                     decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey)),
+                                        border: Border.all(color: Colors.white)),
                                     child: Padding(
                                       padding: const EdgeInsets.only(
                                           top: 6.0, bottom: 6),
@@ -482,6 +482,7 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                                   Padding(
                                     padding: const EdgeInsets.only(
                                       top: 6,
+                                      bottom: 4
                                     ),
                                     child: Row(
                                       children: [
@@ -501,13 +502,17 @@ class _PlaceDetailInfoScreenState extends State<PlaceDetailInfoScreen>
                                     height: 300,
                                     width: double.infinity,
                                     decoration: BoxDecoration(
-                                        border: Border.all(color: Colors.grey)),
+                                        border: Border.all(color: Colors.white)),
                                     child: Padding(
                                       padding: const EdgeInsets.all(6.0),
                                       child: loadedPlace.latitude != 0 &&
                                               loadedPlace.longitude != 0
                                           ? PlaceLocationWidget(
-                                              place: loadedPlace,
+                                              id: loadedPlace.id,
+                                              name: loadedPlace.name,
+                                              typeId: loadedPlace.placeType.id,
+                                              latitude: loadedPlace.latitude,
+                                              longitude: loadedPlace.longitude,
                                             )
                                           : Center(
                                               child: Text(
